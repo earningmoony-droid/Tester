@@ -1,0 +1,6 @@
+{
+  "name": "Video Playback Automation Tester",
+  "description": "Mobile-first playback diagnostics, compatibility verification, countdown timers, and auto-scroll testing suite for YouTube, Facebook, and custom video URLs.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,4143 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Video Playback Automation Tester</title>
+    <meta
+      name="description"
+      content="Mobile-first playback diagnostics, compatibility verification, countdown timers, and auto-scroll testing suite for YouTube, Facebook, and custom video URLs."
+    />
+    <meta property="og:title" content="Video Playback Automation Tester" />
+    <meta
+      property="og:description"
+      content="Mobile-first playback diagnostics, compatibility verification, countdown timers, and auto-scroll testing suite for YouTube, Facebook, and custom video URLs."
+    />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#090d16" id="meta-theme-color" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem('vpat_settings_v1');
+          var theme = 'dark';
+          if (saved) {
+            var parsed = JSON.parse(saved);
+            if (parsed && (parsed.theme === 'light' || parsed.theme === 'dark')) {
+              theme = parsed.theme;
+            }
+          } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+            theme = 'light';
+          }
+          document.documentElement.setAttribute('data-theme', theme);
+          var metaTheme = document.getElementById('meta-theme-color');
+          if (metaTheme) {
+            metaTheme.setAttribute('content', theme === 'dark' ? '#090d16' : '#eef3f8');
+          }
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      })();
+    </script>
+    <style>
+      :root,
+      [data-theme='light'] {
+        --bg-canvas: #eef3f8;
+        --bg-mesh-1: rgba(2, 132, 199, 0.15);
+        --bg-mesh-2: rgba(14, 165, 233, 0.11);
+        --bg-mesh-3: rgba(16, 185, 129, 0.1);
+        --glass-surface: rgba(255, 255, 255, 0.7);
+        --glass-surface-strong: rgba(255, 255, 255, 0.88);
+        --glass-surface-subtle: rgba(255, 255, 255, 0.45);
+        --glass-input: rgba(255, 255, 255, 0.8);
+        --glass-border: rgba(15, 23, 42, 0.09);
+        --glass-border-strong: rgba(15, 23, 42, 0.16);
+        --glass-highlight: rgba(255, 255, 255, 0.94);
+        --glass-shadow: 0 12px 36px -12px rgba(15, 23, 42, 0.1), 0 2px 8px -2px rgba(15, 23, 42, 0.05);
+        --text-primary: #0f172a;
+        --text-secondary: #334155;
+        --text-muted: #64748b;
+        --accent: #0284c7;
+        --accent-hover: #0369a1;
+        --accent-contrast: #ffffff;
+        --accent-soft: rgba(2, 132, 199, 0.11);
+        --success: #047857;
+        --success-soft: rgba(5, 150, 105, 0.11);
+        --warning: #b45309;
+        --warning-soft: rgba(217, 119, 6, 0.12);
+        --danger: #b91c1c;
+        --danger-soft: rgba(220, 38, 38, 0.11);
+        --divider: rgba(15, 23, 42, 0.08);
+        --track-bg: rgba(15, 23, 42, 0.1);
+        color-scheme: light;
+      }
+
+      [data-theme='dark'] {
+        --bg-canvas: #090d16;
+        --bg-mesh-1: rgba(56, 189, 248, 0.14);
+        --bg-mesh-2: rgba(14, 165, 233, 0.09);
+        --bg-mesh-3: rgba(16, 185, 129, 0.08);
+        --glass-surface: rgba(17, 24, 39, 0.66);
+        --glass-surface-strong: rgba(15, 23, 42, 0.88);
+        --glass-surface-subtle: rgba(30, 41, 59, 0.44);
+        --glass-input: rgba(15, 23, 42, 0.7);
+        --glass-border: rgba(248, 250, 252, 0.11);
+        --glass-border-strong: rgba(248, 250, 252, 0.18);
+        --glass-highlight: rgba(255, 255, 255, 0.09);
+        --glass-shadow: 0 18px 44px -14px rgba(0, 0, 0, 0.55), 0 2px 10px -2px rgba(0, 0, 0, 0.35);
+        --text-primary: #f8fafc;
+        --text-secondary: #cbd5e1;
+        --text-muted: #94a3b8;
+        --accent: #38bdf8;
+        --accent-hover: #7dd3fc;
+        --accent-contrast: #061320;
+        --accent-soft: rgba(56, 189, 248, 0.15);
+        --success: #34d399;
+        --success-soft: rgba(52, 211, 153, 0.14);
+        --warning: #fbbf24;
+        --warning-soft: rgba(251, 191, 36, 0.14);
+        --danger: #f87171;
+        --danger-soft: rgba(248, 113, 113, 0.14);
+        --divider: rgba(248, 250, 252, 0.08);
+        --track-bg: rgba(248, 250, 252, 0.12);
+        color-scheme: dark;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      html {
+        -webkit-text-size-adjust: 100%;
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+        font-size: 15px;
+        line-height: 1.55;
+        background-color: var(--bg-canvas);
+        color: var(--text-primary);
+        transition: background-color 220ms cubic-bezier(0.16, 1, 0.3, 1), color 220ms cubic-bezier(0.16, 1, 0.3, 1);
+        overflow-x: hidden;
+        padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px));
+      }
+
+      [data-theme='dark'] body {
+        letter-spacing: 0.005em;
+      }
+
+      .mono,
+      .tabular {
+        font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-variant-numeric: tabular-nums;
+      }
+
+      /* Ambient Glass Mosaic Backdrop */
+      .ambient-canvas {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+        overflow: hidden;
+      }
+
+      .ambient-orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0.9;
+        transform: translateZ(0);
+      }
+
+      .ambient-orb-1 {
+        width: 420px;
+        height: 420px;
+        top: -120px;
+        left: -90px;
+        background: var(--bg-mesh-1);
+      }
+
+      .ambient-orb-2 {
+        width: 380px;
+        height: 380px;
+        top: 24%;
+        right: -110px;
+        background: var(--bg-mesh-2);
+      }
+
+      .ambient-orb-3 {
+        width: 460px;
+        height: 460px;
+        bottom: -140px;
+        left: 22%;
+        background: var(--bg-mesh-3);
+      }
+
+      /* App Shell */
+      .app-shell {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 16px;
+      }
+
+      @media (min-width: 768px) {
+        .app-shell {
+          padding: 0 28px;
+        }
+        body {
+          padding-bottom: 48px;
+        }
+      }
+
+      /* Top Bar: 3 zones, single row */
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        height: 60px;
+        border-bottom: 1px solid var(--divider);
+        margin-bottom: 20px;
+      }
+
+      .brand-wordmark {
+        font-size: 16px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: var(--text-primary);
+        white-space: nowrap;
+        flex-shrink: 0;
+        text-decoration: none;
+      }
+
+      .desktop-nav {
+        display: none;
+        align-items: center;
+        gap: 24px;
+      }
+
+      @media (min-width: 768px) {
+        .desktop-nav {
+          display: flex;
+        }
+      }
+
+      .desktop-nav-btn {
+        background: none;
+        border: none;
+        padding: 8px 2px;
+        min-height: 44px;
+        font-family: inherit;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text-muted);
+        cursor: pointer;
+        white-space: nowrap;
+        flex-shrink: 0;
+        position: relative;
+        transition: color 160ms cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .desktop-nav-btn:hover {
+        color: var(--text-primary);
+      }
+
+      .desktop-nav-btn.is-active {
+        color: var(--text-primary);
+        font-weight: 600;
+      }
+
+      .desktop-nav-btn.is-active::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 6px;
+        height: 2px;
+        border-radius: 2px;
+        background: var(--accent);
+      }
+
+      .topbar-action {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+      }
+
+      /* Glass Mosaic Panels */
+      .glass-panel {
+        background: var(--glass-surface);
+        backdrop-filter: blur(24px) saturate(175%);
+        -webkit-backdrop-filter: blur(24px) saturate(175%);
+        border: 1px solid var(--glass-border);
+        box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+        border-radius: 24px;
+        padding: 20px;
+      }
+
+      @media (min-width: 768px) {
+        .glass-panel {
+          padding: 24px;
+        }
+      }
+
+      /* Interactive Controls */
+      button,
+      input,
+      select {
+        font-family: inherit;
+      }
+
+      button:focus-visible,
+      input:focus-visible,
+      select:focus-visible,
+      a:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 44px;
+        padding: 10px 18px;
+        border-radius: 14px;
+        font-size: 14px;
+        font-weight: 600;
+        border: 1px solid transparent;
+        cursor: pointer;
+        white-space: nowrap;
+        flex-shrink: 0;
+        text-decoration: none;
+        transition: transform 150ms cubic-bezier(0.16, 1, 0.3, 1),
+          background-color 150ms cubic-bezier(0.16, 1, 0.3, 1),
+          border-color 150ms cubic-bezier(0.16, 1, 0.3, 1),
+          opacity 150ms cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .btn:active:not(:disabled) {
+        transform: scale(0.97);
+      }
+
+      .btn:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+
+      .btn-sm {
+        min-height: 38px;
+        padding: 6px 12px;
+        font-size: 12.5px;
+        border-radius: 11px;
+      }
+
+      .btn-primary {
+        background: var(--accent);
+        color: var(--accent-contrast);
+      }
+
+      .btn-primary:hover:not(:disabled) {
+        background: var(--accent-hover);
+      }
+
+      .btn-glass {
+        background: var(--glass-surface-subtle);
+        color: var(--text-primary);
+        border-color: var(--glass-border-strong);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+      }
+
+      .btn-glass:hover:not(:disabled) {
+        background: var(--glass-surface-strong);
+      }
+
+      .btn-danger-soft {
+        background: var(--danger-soft);
+        color: var(--danger);
+        border-color: transparent;
+      }
+
+      .btn-danger-soft:hover:not(:disabled) {
+        border-color: var(--danger);
+      }
+
+      /* Views */
+      .view-section {
+        display: none;
+        animation: fadeSlideUp 200ms cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .view-section.is-visible {
+        display: block;
+      }
+
+      @keyframes fadeSlideUp {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Responsive Grid Workspace */
+      .workspace-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      @media (min-width: 960px) {
+        .workspace-grid {
+          grid-template-columns: 1.35fr 1fr;
+          align-items: start;
+          gap: 24px;
+        }
+      }
+
+      .section-heading {
+        margin: 0 0 4px 0;
+        font-size: clamp(1.35rem, 2.5vw, 1.85rem);
+        font-weight: 700;
+        letter-spacing: -0.025em;
+        line-height: 1.2;
+        text-wrap: balance;
+      }
+
+      .section-subtitle {
+        margin: 0;
+        font-size: 14px;
+        color: var(--text-muted);
+      }
+
+      .block-title {
+        margin: 0 0 12px 0;
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--text-primary);
+        letter-spacing: -0.01em;
+      }
+
+      /* Segmented Control */
+      .segmented-bar {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+        padding: 5px;
+        background: var(--glass-surface-subtle);
+        border: 1px solid var(--glass-border);
+        border-radius: 16px;
+      }
+
+      .segmented-btn {
+        min-height: 44px;
+        padding: 8px 10px;
+        border: none;
+        border-radius: 12px;
+        background: transparent;
+        color: var(--text-secondary);
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        transition: background-color 160ms cubic-bezier(0.16, 1, 0.3, 1),
+          color 160ms cubic-bezier(0.16, 1, 0.3, 1),
+          box-shadow 160ms cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .segmented-btn:hover {
+        color: var(--text-primary);
+      }
+
+      .segmented-btn.is-active {
+        background: var(--glass-surface-strong);
+        color: var(--text-primary);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08), inset 0 1px 0 var(--glass-highlight);
+      }
+
+      /* URL Input Row */
+      .url-form {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .url-form-row {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      @media (min-width: 560px) {
+        .url-form-row {
+          flex-direction: row;
+          align-items: stretch;
+        }
+      }
+
+      .input-wrap {
+        position: relative;
+        flex: 1;
+        display: flex;
+        align-items: center;
+      }
+
+      .text-input {
+        width: 100%;
+        min-height: 46px;
+        padding: 10px 88px 10px 14px;
+        border-radius: 14px;
+        border: 1px solid var(--glass-border-strong);
+        background: var(--glass-input);
+        color: var(--text-primary);
+        font-size: 14px;
+        transition: border-color 150ms ease, background-color 150ms ease;
+      }
+
+      .text-input-plain {
+        width: 100%;
+        min-height: 44px;
+        padding: 9px 14px;
+        border-radius: 14px;
+        border: 1px solid var(--glass-border-strong);
+        background: var(--glass-input);
+        color: var(--text-primary);
+        font-size: 14px;
+      }
+
+      .text-input::placeholder,
+      .text-input-plain::placeholder {
+        color: var(--text-muted);
+      }
+
+      .text-input:focus,
+      .text-input-plain:focus {
+        border-color: var(--accent);
+        outline: none;
+      }
+
+      .input-inline-actions {
+        position: absolute;
+        right: 4px;
+        display: flex;
+        align-items: center;
+        gap: 2px;
+      }
+
+      .input-ghost-btn {
+        min-width: 38px;
+        min-height: 38px;
+        padding: 6px;
+        border: none;
+        border-radius: 10px;
+        background: transparent;
+        color: var(--text-muted);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: color 140ms ease, background-color 140ms ease;
+      }
+
+      .input-ghost-btn:hover {
+        color: var(--text-primary);
+        background: var(--glass-surface-subtle);
+      }
+
+      /* Compatibility Line */
+      .compat-line {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px 12px;
+        padding: 10px 0 2px;
+        font-size: 13px;
+        color: var(--text-secondary);
+      }
+
+      .compat-status-text {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 600;
+      }
+
+      .compat-status-text.ok {
+        color: var(--success);
+      }
+      .compat-status-text.warn {
+        color: var(--warning);
+      }
+      .compat-status-text.err {
+        color: var(--danger);
+      }
+
+      .sep {
+        color: var(--text-muted);
+        opacity: 0.6;
+        user-select: none;
+      }
+
+      /* Inline Error / Notice Banner */
+      .notice-banner {
+        display: none;
+        align-items: flex-start;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        font-size: 13px;
+        line-height: 1.45;
+        margin-top: 12px;
+      }
+
+      .notice-banner.is-visible {
+        display: flex;
+      }
+
+      .notice-banner.is-error {
+        background: var(--danger-soft);
+        color: var(--danger);
+        border: 1px solid rgba(239, 68, 68, 0.25);
+      }
+
+      .notice-banner.is-warning {
+        background: var(--warning-soft);
+        color: var(--warning);
+        border: 1px solid rgba(245, 158, 11, 0.25);
+      }
+
+      .notice-banner.is-info {
+        background: var(--accent-soft);
+        color: var(--accent);
+        border: 1px solid rgba(56, 189, 248, 0.25);
+      }
+
+      .notice-banner.is-success {
+        background: var(--success-soft);
+        color: var(--success);
+        border: 1px solid rgba(16, 185, 129, 0.25);
+      }
+
+      /* Player Viewport */
+      .player-stage-outer {
+        display: flex;
+        justify-content: center;
+        margin-top: 16px;
+      }
+
+      .player-stage {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        border-radius: 18px;
+        overflow: hidden;
+        background: rgba(2, 6, 23, 0.88);
+        border: 1px solid var(--glass-border);
+        transition: max-width 200ms cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .player-stage.is-portrait {
+        aspect-ratio: 9 / 16;
+        max-width: 340px;
+      }
+
+      .player-stage iframe,
+      .player-stage video,
+      .player-stage #yt-player-mount {
+        width: 100%;
+        height: 100%;
+        border: 0;
+        display: block;
+      }
+
+      .player-stage video {
+        object-fit: contain;
+        background: #000;
+      }
+
+      .player-empty {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 24px;
+        color: var(--text-muted);
+        background: radial-gradient(circle at 50% 35%, rgba(56, 189, 248, 0.08), transparent 70%);
+      }
+
+      .player-empty-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--glass-surface-subtle);
+        border: 1px solid var(--glass-border);
+        color: var(--text-secondary);
+        margin-bottom: 12px;
+      }
+
+      .player-loading {
+        position: absolute;
+        inset: 0;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        background: rgba(9, 13, 22, 0.76);
+        backdrop-filter: blur(8px);
+        color: #f8fafc;
+        font-size: 13px;
+        font-weight: 500;
+        z-index: 4;
+      }
+
+      .player-loading.is-visible {
+        display: flex;
+      }
+
+      .spinner {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        border: 2.5px solid rgba(255, 255, 255, 0.2);
+        border-top-color: var(--accent);
+        animation: spin 750ms linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Player Utility Toolbar */
+      .player-meta-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px 14px;
+        padding-top: 12px;
+        font-size: 12.5px;
+        color: var(--text-muted);
+      }
+
+      .player-quick-tools {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+      }
+
+      /* Live Metrics Strip */
+      .metrics-strip {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+        padding: 16px 0;
+        border-top: 1px solid var(--divider);
+        border-bottom: 1px solid var(--divider);
+        margin: 16px 0;
+      }
+
+      @media (min-width: 560px) {
+        .metrics-strip {
+          grid-template-columns: repeat(4, 1fr);
+        }
+      }
+
+      .metric-cell {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        min-width: 0;
+      }
+
+      .metric-label {
+        font-size: 12px;
+        color: var(--text-muted);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .metric-value {
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: var(--text-primary);
+        line-height: 1.2;
+      }
+
+      .metric-sub {
+        font-size: 11.5px;
+        color: var(--text-muted);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      /* Progress Bar */
+      .progress-track {
+        width: 100%;
+        height: 6px;
+        border-radius: 99px;
+        background: var(--track-bg);
+        overflow: hidden;
+        margin-bottom: 16px;
+      }
+
+      .progress-fill {
+        height: 100%;
+        width: 0%;
+        background: var(--accent);
+        border-radius: 99px;
+        transition: width 250ms linear;
+      }
+
+      /* Primary Control Bar */
+      .controls-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+
+      @media (min-width: 480px) {
+        .controls-grid {
+          grid-template-columns: repeat(4, 1fr);
+        }
+      }
+
+      .live-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .live-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: currentColor;
+      }
+
+      .live-dot.is-pulsing {
+        animation: pulseGlow 1.6s ease-in-out infinite;
+      }
+
+      @keyframes pulseGlow {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.45;
+          transform: scale(0.82);
+        }
+      }
+
+      .stack-divider {
+        height: 1px;
+        background: var(--divider);
+        margin: 18px 0;
+      }
+
+      /* Presets & Settings Rows */
+      .preset-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 14px;
+      }
+
+      .preset-btn {
+        min-height: 40px;
+        padding: 6px 14px;
+        border-radius: 12px;
+        border: 1px solid var(--glass-border);
+        background: var(--glass-surface-subtle);
+        color: var(--text-secondary);
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: all 150ms ease;
+      }
+
+      .preset-btn:hover {
+        color: var(--text-primary);
+        border-color: var(--glass-border-strong);
+      }
+
+      .preset-btn.is-active {
+        background: var(--accent-soft);
+        color: var(--accent);
+        border-color: var(--accent);
+      }
+
+      .field-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        min-height: 48px;
+        padding: 6px 0;
+      }
+
+      .field-label-group {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+      }
+
+      .field-label {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text-primary);
+      }
+
+      .field-hint {
+        font-size: 12px;
+        color: var(--text-muted);
+      }
+
+      .num-input {
+        width: 92px;
+        min-height: 42px;
+        padding: 8px 10px;
+        border-radius: 12px;
+        border: 1px solid var(--glass-border-strong);
+        background: var(--glass-input);
+        color: var(--text-primary);
+        font-size: 14px;
+        text-align: right;
+      }
+
+      .select-input {
+        min-height: 42px;
+        padding: 8px 12px;
+        border-radius: 12px;
+        border: 1px solid var(--glass-border-strong);
+        background: var(--glass-input);
+        color: var(--text-primary);
+        font-size: 13.5px;
+      }
+
+      /* Liquid Toggle Switch */
+      .switch {
+        position: relative;
+        width: 50px;
+        height: 30px;
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 50px;
+        min-height: 44px;
+      }
+
+      .switch input {
+        position: absolute;
+        opacity: 0;
+        width: 50px;
+        height: 44px;
+        margin: 0;
+        cursor: pointer;
+      }
+
+      .switch-track {
+        width: 50px;
+        height: 30px;
+        border-radius: 99px;
+        background: var(--track-bg);
+        border: 1px solid var(--glass-border);
+        position: relative;
+        transition: background-color 180ms cubic-bezier(0.16, 1, 0.3, 1);
+        pointer-events: none;
+      }
+
+      .switch-thumb {
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: #ffffff;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+        transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .switch input:checked + .switch-track {
+        background: var(--accent);
+        border-color: transparent;
+      }
+
+      .switch input:checked + .switch-track .switch-thumb {
+        transform: translateX(20px);
+      }
+
+      .switch input:focus-visible + .switch-track {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+
+      /* Range Slider */
+      .range-wrap {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 0 4px;
+      }
+
+      input[type='range'] {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 6px;
+        border-radius: 99px;
+        background: var(--track-bg);
+        outline: none;
+      }
+
+      input[type='range']::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: var(--accent);
+        border: 2px solid #ffffff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+        cursor: pointer;
+      }
+
+      /* Scroll Controls & Arena */
+      .scroll-btn-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .scroll-arena {
+        margin-top: 20px;
+        min-height: 420px;
+      }
+
+      .scroll-markers {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 12px;
+        margin-top: 14px;
+      }
+
+      .scroll-checkpoint {
+        padding: 16px;
+        border-radius: 16px;
+        border: 1px solid var(--glass-border);
+        background: var(--glass-surface-subtle);
+      }
+
+      .scroll-checkpoint-title {
+        font-size: 13.5px;
+        font-weight: 600;
+        margin: 0 0 4px 0;
+      }
+
+      .scroll-checkpoint-desc {
+        font-size: 12.5px;
+        color: var(--text-muted);
+        margin: 0;
+      }
+
+      .compat-matrix {
+        margin-top: 20px;
+        border-top: 1px solid var(--divider);
+      }
+
+      .compat-matrix-row {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 4px 16px;
+        padding: 12px 2px;
+        border-bottom: 1px solid var(--divider);
+        font-size: 13px;
+      }
+
+      @media (min-width: 700px) {
+        .compat-matrix-row {
+          grid-template-columns: 140px 1fr 1fr;
+          align-items: baseline;
+        }
+      }
+
+      /* Test Session Log */
+      .log-list {
+        max-height: 240px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        border-top: 1px solid var(--divider);
+      }
+
+      .log-item {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+        padding: 9px 2px;
+        border-bottom: 1px solid var(--divider);
+        font-size: 12.5px;
+        line-height: 1.4;
+      }
+
+      .log-time {
+        color: var(--text-muted);
+        flex-shrink: 0;
+        font-size: 11.5px;
+      }
+
+      .log-msg {
+        color: var(--text-secondary);
+        word-break: break-word;
+      }
+
+      .log-msg.level-error {
+        color: var(--danger);
+      }
+      .log-msg.level-warn {
+        color: var(--warning);
+      }
+      .log-msg.level-success {
+        color: var(--success);
+      }
+
+      /* Dashboard & History */
+      .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      @media (min-width: 768px) {
+        .kpi-grid {
+          grid-template-columns: repeat(4, 1fr);
+        }
+      }
+
+      .kpi-block {
+        padding: 18px 20px;
+        border-radius: 20px;
+        background: var(--glass-surface);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        box-shadow: inset 0 1px 0 var(--glass-highlight);
+      }
+
+      .history-toolbar {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      @media (min-width: 768px) {
+        .history-toolbar {
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
+        }
+      }
+
+      .filter-tabs {
+        display: inline-flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 4px;
+        background: var(--glass-surface-subtle);
+        border: 1px solid var(--glass-border);
+        border-radius: 14px;
+      }
+
+      .filter-tab-btn {
+        min-height: 38px;
+        padding: 6px 12px;
+        border: none;
+        border-radius: 10px;
+        background: transparent;
+        color: var(--text-secondary);
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+
+      .filter-tab-btn.is-active {
+        background: var(--glass-surface-strong);
+        color: var(--text-primary);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      }
+
+      .history-list {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .history-row {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 14px 4px;
+        border-bottom: 1px solid var(--divider);
+      }
+
+      .history-row-top {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      @media (min-width: 680px) {
+        .history-row-top {
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+        }
+      }
+
+      .history-url {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-primary);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 100%;
+      }
+
+      .history-meta {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px 10px;
+        font-size: 12.5px;
+        color: var(--text-muted);
+      }
+
+      .history-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+      }
+
+      .history-log-drawer {
+        display: none;
+        padding: 10px 12px;
+        border-radius: 14px;
+        background: var(--glass-surface-subtle);
+        border: 1px solid var(--glass-border);
+        font-size: 12px;
+        max-height: 180px;
+        overflow-y: auto;
+      }
+
+      .history-log-drawer.is-open {
+        display: block;
+      }
+
+      .empty-state {
+        padding: 36px 16px;
+        text-align: center;
+        color: var(--text-muted);
+      }
+
+      .empty-state-title {
+        margin: 10px 0 4px;
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      .empty-state-desc {
+        margin: 0 auto;
+        max-width: 40ch;
+        font-size: 13px;
+      }
+
+      /* Mobile Floating Glass Bottom Navigation */
+      .bottom-dock-wrap {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: max(12px, env(safe-area-inset-bottom, 0px));
+        z-index: 40;
+        display: flex;
+        justify-content: center;
+        padding: 0 14px;
+        pointer-events: none;
+      }
+
+      @media (min-width: 768px) {
+        .bottom-dock-wrap {
+          display: none;
+        }
+      }
+
+      .bottom-dock {
+        pointer-events: auto;
+        width: 100%;
+        max-width: 440px;
+        height: 62px;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        align-items: center;
+        padding: 4px 6px;
+        border-radius: 24px;
+        background: var(--glass-surface-strong);
+        backdrop-filter: blur(26px) saturate(190%);
+        -webkit-backdrop-filter: blur(26px) saturate(190%);
+        border: 1px solid var(--glass-border-strong);
+        box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+      }
+
+      .dock-tab {
+        min-height: 50px;
+        border: none;
+        background: transparent;
+        border-radius: 18px;
+        color: var(--text-muted);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        font-size: 11px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: color 150ms ease, background-color 150ms ease;
+      }
+
+      .dock-tab.is-active {
+        color: var(--accent);
+        background: var(--accent-soft);
+      }
+
+      .confirm-inline {
+        display: none;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 8px;
+      }
+
+      .confirm-inline.is-visible {
+        display: flex;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="ambient-canvas" aria-hidden="true">
+      <div class="ambient-orb ambient-orb-1"></div>
+      <div class="ambient-orb ambient-orb-2"></div>
+      <div class="ambient-orb ambient-orb-3"></div>
+    </div>
+
+    <div class="app-shell">
+      <!-- Top Bar -->
+      <header class="topbar">
+        <a href="#tester" class="brand-wordmark" data-nav="tester">Playback Tester</a>
+
+        <nav class="desktop-nav" aria-label="Primary Navigation">
+          <button type="button" class="desktop-nav-btn is-active" data-nav="tester">Tester</button>
+          <button type="button" class="desktop-nav-btn" data-nav="dashboard">Dashboard</button>
+          <button type="button" class="desktop-nav-btn" data-nav="history">History</button>
+          <button type="button" class="desktop-nav-btn" data-nav="settings">Settings</button>
+        </nav>
+
+        <div class="topbar-action">
+          <button type="button" id="theme-toggle-btn" class="btn btn-glass" aria-label="Switch color theme">
+            <svg id="theme-icon-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+              <circle cx="12" cy="12" r="4"></circle>
+              <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+            </svg>
+            <svg id="theme-icon-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+            </svg>
+            <span id="theme-label">Light Mode</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- VIEW 1: TESTER -->
+      <main id="view-tester" class="view-section is-visible" aria-label="Playback Tester">
+        <div style="margin-bottom: 18px;">
+          <h1 class="section-heading">Video Playback Automation Tester</h1>
+          <p class="section-subtitle">
+            Verify embedding compatibility, playback timers, repeat loops, and mobile scroll behavior across YouTube, Facebook, and custom video URLs.
+          </p>
+        </div>
+
+        <div class="workspace-grid">
+          <!-- Left Column: Platform, URL Input, Player, Metrics & Controls -->
+          <section class="glass-panel" aria-label="Video Player and Session Controls">
+            <h2 class="block-title">Platform &amp; Source URL</h2>
+
+            <div class="segmented-bar" role="tablist" aria-label="Select video platform">
+              <button type="button" class="segmented-btn is-active" role="tab" aria-selected="true" data-platform="youtube">
+                YouTube
+              </button>
+              <button type="button" class="segmented-btn" role="tab" aria-selected="false" data-platform="facebook">
+                Facebook
+              </button>
+              <button type="button" class="segmented-btn" role="tab" aria-selected="false" data-platform="custom">
+                Custom URL
+              </button>
+            </div>
+
+            <form id="url-form" class="url-form" novalidate>
+              <div class="url-form-row">
+                <div class="input-wrap">
+                  <input
+                    type="url"
+                    id="video-url-input"
+                    class="text-input"
+                    placeholder="https://www.youtube.com/watch?v=..."
+                    autocomplete="off"
+                    spellcheck="false"
+                    aria-label="Video URL"
+                  />
+                  <div class="input-inline-actions">
+                    <button type="button" id="paste-url-btn" class="input-ghost-btn" title="Paste URL" aria-label="Paste URL from clipboard">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect>
+                        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                      </svg>
+                    </button>
+                    <button type="button" id="clear-url-btn" class="input-ghost-btn" title="Clear URL" aria-label="Clear URL">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 6 6 18M6 6l12 12"></path>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                <button type="submit" id="load-video-btn" class="btn btn-primary">Load Video</button>
+              </div>
+            </form>
+
+            <!-- Compatibility Status -->
+            <div class="compat-line" id="compat-line">
+              <span id="compat-status" class="compat-status-text">Ready for URL</span>
+              <span class="sep" aria-hidden="true">·</span>
+              <span id="compat-platform-detail">YouTube IFrame Player API</span>
+              <span class="sep" aria-hidden="true">·</span>
+              <span id="compat-telemetry-detail">Real PlayerState verification</span>
+            </div>
+
+            <!-- Inline Error / Notice Banner -->
+            <div id="tester-notice" class="notice-banner" role="alert" aria-live="polite">
+              <div style="display: flex; align-items: flex-start; gap: 10px; flex: 1; min-width: 200px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 1px;">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" x2="12" y1="8" y2="12"></line>
+                  <line x1="12" x2="12.01" y1="16" y2="16"></line>
+                </svg>
+                <div id="tester-notice-text" style="flex: 1;"></div>
+              </div>
+              <div id="tester-notice-actions" style="display: none; gap: 8px; flex-wrap: wrap;"></div>
+            </div>
+
+            <!-- Player Stage -->
+            <div class="player-stage-outer">
+              <div id="player-stage" class="player-stage">
+                <div id="player-empty" class="player-empty">
+                  <div class="player-empty-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polygon points="6 3 20 12 6 21 6 3"></polygon>
+                    </svg>
+                  </div>
+                  <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">No video loaded</div>
+                  <div style="font-size: 13px; max-width: 34ch;">
+                    Paste a valid YouTube, Facebook, or direct media URL above and select Load Video.
+                  </div>
+                </div>
+                <div id="player-loading" class="player-loading" aria-live="polite">
+                  <div class="spinner"></div>
+                  <span id="player-loading-text">Initializing player...</span>
+                </div>
+                <div id="player-mount" style="width: 100%; height: 100%; display: none;"></div>
+              </div>
+            </div>
+
+            <!-- Player Live Diagnostics & Tools Row -->
+            <div class="player-meta-row">
+              <div>
+                <span>Visible:</span>
+                <strong id="viewport-visibility-label" class="tabular">100%</strong>
+                <span class="sep" aria-hidden="true">·</span>
+                <span id="media-position-label" class="tabular">00:00 / --:--</span>
+                <span class="sep" aria-hidden="true">·</span>
+                <span id="player-resolution-label">Awaiting media</span>
+              </div>
+              <div class="player-quick-tools">
+                <button type="button" id="btn-aspect-toggle" class="btn btn-glass btn-sm" title="Switch 16:9 / 9:16 Reels aspect ratio">
+                  16:9 View
+                </button>
+                <button type="button" id="btn-mute-toggle" class="btn btn-glass btn-sm" disabled>
+                  Muted
+                </button>
+                <select id="select-playback-rate" class="select-input" style="min-height: 38px; padding: 4px 10px; font-size: 12.5px;" aria-label="Playback speed" disabled>
+                  <option value="0.5">0.5x</option>
+                  <option value="1" selected>1.0x</option>
+                  <option value="1.5">1.5x</option>
+                  <option value="2">2.0x</option>
+                </select>
+                <a
+                  id="external-open-link"
+                  href="#"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="btn btn-glass btn-sm"
+                  style="display: none;"
+                >
+                  Open External
+                </a>
+              </div>
+            </div>
+
+            <!-- Live Testing Telemetry Strip -->
+            <div class="metrics-strip">
+              <div class="metric-cell">
+                <span class="metric-label">Playback Time</span>
+                <span id="metric-playback-time" class="metric-value tabular">00:00</span>
+                <span id="metric-playback-note" class="metric-sub">Verified playback</span>
+              </div>
+              <div class="metric-cell">
+                <span class="metric-label">Session Time</span>
+                <span id="metric-session-time" class="metric-value tabular">00:00</span>
+                <span id="metric-session-start" class="metric-sub">Not started</span>
+              </div>
+              <div class="metric-cell">
+                <span class="metric-label">Countdown</span>
+                <span id="metric-countdown" class="metric-value tabular">01:00</span>
+                <span id="metric-target-label" class="metric-sub">Target 60s</span>
+              </div>
+              <div class="metric-cell">
+                <span class="metric-label">Status</span>
+                <span id="metric-status" class="live-indicator" style="margin-top: 4px;">
+                  <span id="metric-status-dot" class="live-dot"></span>
+                  <span id="metric-status-text">Idle</span>
+                </span>
+                <span id="metric-repeat-count" class="metric-sub">0 repeats</span>
+              </div>
+            </div>
+
+            <!-- Countdown Progress Bar -->
+            <div class="progress-track" aria-label="Test duration progress">
+              <div id="session-progress-fill" class="progress-fill"></div>
+            </div>
+
+            <!-- Playback Testing Controls -->
+            <div class="controls-grid">
+              <button type="button" id="btn-start-test" class="btn btn-primary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <polygon points="6 4 20 12 6 20 6 4"></polygon>
+                </svg>
+                Start
+              </button>
+              <button type="button" id="btn-pause-test" class="btn btn-glass" disabled>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <rect x="6" y="4" width="4" height="16"></rect>
+                  <rect x="14" y="4" width="4" height="16"></rect>
+                </svg>
+                Pause
+              </button>
+              <button type="button" id="btn-stop-test" class="btn btn-danger-soft" disabled>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <rect x="5" y="5" width="14" height="14" rx="2"></rect>
+                </svg>
+                Stop
+              </button>
+              <button type="button" id="btn-reset-test" class="btn btn-glass">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                  <path d="M3 3v5h5"></path>
+                </svg>
+                Reset
+              </button>
+            </div>
+          </section>
+
+          <!-- Right Column: Test Settings, Scroll Controls & Live Log -->
+          <section class="glass-panel" aria-label="Automation Test Settings and Session Log">
+            <h2 class="block-title">Playback Test Configuration</h2>
+
+            <div class="preset-row" role="group" aria-label="Target duration presets">
+              <button type="button" class="preset-btn" data-duration="30">30s</button>
+              <button type="button" class="preset-btn is-active" data-duration="60">1m</button>
+              <button type="button" class="preset-btn" data-duration="120">2m</button>
+              <button type="button" class="preset-btn" data-duration="300">5m</button>
+              <button type="button" class="preset-btn" data-duration="600">10m</button>
+            </div>
+
+            <div class="field-row">
+              <div class="field-label-group">
+                <label for="input-target-duration" class="field-label">Test duration (seconds)</label>
+                <span class="field-hint">Countdown target before auto-stop</span>
+              </div>
+              <input type="number" id="input-target-duration" class="num-input tabular" min="5" max="7200" step="5" value="60" />
+            </div>
+
+            <div class="field-row">
+              <div class="field-label-group">
+                <label for="toggle-auto-stop" class="field-label">Auto-stop at 00:00</label>
+                <span class="field-hint">Halt playback and save session when timer ends</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="toggle-auto-stop" checked />
+                <span class="switch-track"><span class="switch-thumb"></span></span>
+              </label>
+            </div>
+
+            <div class="field-row">
+              <div class="field-label-group">
+                <label for="toggle-repeat" class="field-label">Repeat playback</label>
+                <span class="field-hint">Restart at end when supported by player API</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="toggle-repeat" />
+                <span class="switch-track"><span class="switch-thumb"></span></span>
+              </label>
+            </div>
+
+            <div class="field-row">
+              <div class="field-label-group">
+                <label for="toggle-muted-start" class="field-label">Muted autoplay start</label>
+                <span class="field-hint">Improves Android mobile browser autoplay success</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="toggle-muted-start" checked />
+                <span class="switch-track"><span class="switch-thumb"></span></span>
+              </label>
+            </div>
+
+            <div class="stack-divider"></div>
+
+            <h2 class="block-title">Scroll Behavior Testing</h2>
+
+            <div class="field-row">
+              <div class="field-label-group">
+                <label for="toggle-auto-scroll" class="field-label">Auto-scroll during test</label>
+                <span class="field-hint">Continuously test player behavior on scroll</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="toggle-auto-scroll" />
+                <span class="switch-track"><span class="switch-thumb"></span></span>
+              </label>
+            </div>
+
+            <div class="field-row">
+              <div class="field-label-group">
+                <label for="select-scroll-mode" class="field-label">Scroll direction</label>
+                <span class="field-hint">Pattern used by auto-scroll engine</span>
+              </div>
+              <select id="select-scroll-mode" class="select-input">
+                <option value="bounce">Bounce Up / Down</option>
+                <option value="down">Downward</option>
+                <option value="up">Upward</option>
+              </select>
+            </div>
+
+            <div style="padding-top: 6px;">
+              <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                <label for="range-scroll-speed" class="field-label">Scrolling speed</label>
+                <span id="scroll-speed-readout" class="tabular" style="font-weight: 600; color: var(--accent);">45 px/s</span>
+              </div>
+              <div class="range-wrap">
+                <input type="range" id="range-scroll-speed" min="10" max="200" step="5" value="45" />
+              </div>
+            </div>
+
+            <div class="scroll-btn-row">
+              <button type="button" id="btn-scroll-up" class="btn btn-glass btn-sm">Scroll Up</button>
+              <button type="button" id="btn-scroll-down" class="btn btn-glass btn-sm">Scroll Down</button>
+              <button type="button" id="btn-scroll-player" class="btn btn-glass btn-sm">To Player</button>
+            </div>
+
+            <div class="stack-divider"></div>
+
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px;">
+              <h2 class="block-title" style="margin: 0;">Test Session Log</h2>
+              <div style="display: flex; gap: 6px;">
+                <button type="button" id="btn-copy-log" class="btn btn-glass btn-sm">Copy</button>
+                <button type="button" id="btn-clear-log" class="btn btn-glass btn-sm">Clear</button>
+              </div>
+            </div>
+
+            <div id="session-log-list" class="log-list" aria-live="polite"></div>
+          </section>
+        </div>
+
+        <!-- Scroll Test Arena -->
+        <section class="glass-panel scroll-arena" aria-label="Mobile Scroll Visibility Arena">
+          <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px;">
+            <div>
+              <h2 class="block-title" style="margin-bottom: 2px;">Scroll Behavior &amp; Viewport Visibility Arena</h2>
+              <p class="section-subtitle">
+                Scroll events and IntersectionObserver visibility ratios are logged in real time when testing player behavior off-screen.
+              </p>
+            </div>
+            <div class="tabular" style="font-size: 13px; color: var(--text-secondary);">
+              Scroll Y: <strong id="scroll-y-readout">0 px</strong>
+            </div>
+          </div>
+
+          <div class="scroll-markers">
+            <div class="scroll-checkpoint">
+              <h3 class="scroll-checkpoint-title">Viewport Boundary Check</h3>
+              <p class="scroll-checkpoint-desc">Monitors whether YouTube IFrame API or HTML5 video pauses, buffers, or maintains frame delivery when scrolled out of view.</p>
+            </div>
+            <div class="scroll-checkpoint">
+              <h3 class="scroll-checkpoint-title">Android Touch Compositor</h3>
+              <p class="scroll-checkpoint-desc">Tests glass surface backdrop-filter performance alongside hardware video decoding during smooth vertical scroll.</p>
+            </div>
+            <div class="scroll-checkpoint">
+              <h3 class="scroll-checkpoint-title">Auto-Scroll Bounce Turnaround</h3>
+              <p class="scroll-checkpoint-desc">When Bounce mode reaches the bottom or top scroll bounds, direction reverses cleanly without hijacking manual touch input.</p>
+            </div>
+          </div>
+
+          <div class="compat-matrix" aria-label="Platform Compatibility Reference">
+            <div class="compat-matrix-row">
+              <strong>YouTube Mode</strong>
+              <span style="color: var(--text-secondary);">Uses official IFrame Player API (<code class="mono">enablejsapi=1</code>, <code class="mono">playsinline=1</code>).</span>
+              <span style="color: var(--text-muted);">Tracks real Playing, Paused, Buffering, Ended, position, rate, and uploader embed restrictions (101/150).</span>
+            </div>
+            <div class="compat-matrix-row">
+              <strong>Facebook Mode</strong>
+              <span style="color: var(--text-secondary);">Uses official Embedded Video Plugin (<code class="mono">plugins/video.php</code>).</span>
+              <span style="color: var(--text-muted);">Cross-origin iframe blocks JS state telemetry; external browser button provided for gated Reels or <code class="mono">fb.watch</code> links.</span>
+            </div>
+            <div class="compat-matrix-row">
+              <strong>Custom URL Mode</strong>
+              <span style="color: var(--text-secondary);">Uses native HTML5 <code class="mono">&lt;video&gt;</code> media events or fallback web iframe.</span>
+              <span style="color: var(--text-muted);">Supports direct <code class="mono">.mp4</code>, <code class="mono">.webm</code>, and <code class="mono">.ogg</code> streams with full repeat, mute, and speed testing.</span>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- VIEW 2: DASHBOARD -->
+      <section id="view-dashboard" class="view-section" aria-label="Testing Dashboard">
+        <div style="margin-bottom: 18px;">
+          <h1 class="section-heading">Testing Dashboard</h1>
+          <p class="section-subtitle">Live session metrics, cumulative recorded testing duration, and active player diagnostics.</p>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi-block">
+            <div class="metric-label">Current Session Time</div>
+            <div id="dash-current-session" class="metric-value tabular" style="margin-top: 6px;">00:00</div>
+            <div id="dash-verified-sub" class="metric-sub" style="margin-top: 4px;">00:00 verified playback</div>
+          </div>
+          <div class="kpi-block">
+            <div class="metric-label">Total Testing Duration</div>
+            <div id="dash-total-duration" class="metric-value tabular" style="margin-top: 6px;">00:00</div>
+            <div id="dash-sessions-count" class="metric-sub" style="margin-top: 4px;">0 saved sessions</div>
+          </div>
+          <div class="kpi-block">
+            <div class="metric-label">Active Platform</div>
+            <div id="dash-platform" class="metric-value" style="margin-top: 6px; font-size: 18px;">YouTube</div>
+            <div id="dash-compat-note" class="metric-sub" style="margin-top: 4px;">Awaiting URL</div>
+          </div>
+          <div class="kpi-block">
+            <div class="metric-label">Test Status</div>
+            <div id="dash-status" class="metric-value" style="margin-top: 6px; font-size: 18px;">Idle</div>
+            <div id="dash-start-time" class="metric-sub" style="margin-top: 4px;">Not started</div>
+          </div>
+        </div>
+
+        <div class="glass-panel">
+          <h2 class="block-title">Current Test Target</h2>
+          <div class="field-row" style="border-bottom: 1px solid var(--divider); padding-bottom: 12px;">
+            <div class="field-label-group" style="max-width: 75%;">
+              <span class="field-label">Current Video URL</span>
+              <span id="dash-current-url" class="field-hint" style="word-break: break-all;">No URL loaded yet</span>
+            </div>
+            <button type="button" id="dash-goto-tester" class="btn btn-glass">Open in Tester</button>
+          </div>
+
+          <div style="display: flex; align-items: center; justify-content: space-between; margin: 18px 0 8px;">
+            <h2 class="block-title" style="margin: 0;">Recent Test Sessions</h2>
+            <button type="button" id="dash-view-all-history" class="btn btn-glass btn-sm">View All History</button>
+          </div>
+          <div id="dash-recent-history" class="history-list"></div>
+        </div>
+      </section>
+
+      <!-- VIEW 3: HISTORY -->
+      <section id="view-history" class="view-section" aria-label="Test History">
+        <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 18px;">
+          <div>
+            <h1 class="section-heading">Session History</h1>
+            <p class="section-subtitle">Persisted locally in IndexedDB and LocalStorage. Inspect logs, export reports, or reload any tested URL.</p>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <button type="button" id="history-export-csv" class="btn btn-glass btn-sm">Export CSV</button>
+            <button type="button" id="history-export-json" class="btn btn-glass btn-sm">Export JSON</button>
+            <button type="button" id="history-clear-trigger" class="btn btn-danger-soft btn-sm">Clear History</button>
+          </div>
+        </div>
+
+        <div id="history-clear-confirm" class="notice-banner is-warning" style="margin-bottom: 16px;">
+          <div style="flex: 1;">Remove all saved test session records from IndexedDB and LocalStorage? This cannot be undone.</div>
+          <div style="display: flex; gap: 8px; flex-shrink: 0;">
+            <button type="button" id="history-clear-yes" class="btn btn-danger-soft btn-sm">Confirm Clear</button>
+            <button type="button" id="history-clear-no" class="btn btn-glass btn-sm">Cancel</button>
+          </div>
+        </div>
+
+        <div class="glass-panel">
+          <div class="history-toolbar">
+            <div class="filter-tabs" role="group" aria-label="Filter history by platform">
+              <button type="button" class="filter-tab-btn is-active" data-history-filter="all">All</button>
+              <button type="button" class="filter-tab-btn" data-history-filter="youtube">YouTube</button>
+              <button type="button" class="filter-tab-btn" data-history-filter="facebook">Facebook</button>
+              <button type="button" class="filter-tab-btn" data-history-filter="custom">Custom</button>
+            </div>
+            <div style="flex: 1; max-width: 320px; width: 100%;">
+              <input
+                type="search"
+                id="history-search-input"
+                class="text-input-plain"
+                placeholder="Filter by URL or status..."
+                aria-label="Search test history"
+              />
+            </div>
+          </div>
+
+          <div id="full-history-list" class="history-list"></div>
+        </div>
+      </section>
+
+      <!-- VIEW 4: SETTINGS -->
+      <section id="view-settings" class="view-section" aria-label="Application Settings">
+        <div style="margin-bottom: 18px;">
+          <h1 class="section-heading">Settings</h1>
+          <p class="section-subtitle">Configure appearance, default timer targets, scroll automation, and browser database persistence.</p>
+        </div>
+
+        <div class="workspace-grid">
+          <section class="glass-panel">
+            <h2 class="block-title">Appearance &amp; Test Defaults</h2>
+
+            <div class="field-row">
+              <div class="field-label-group">
+                <label for="setting-theme-select" class="field-label">Color Theme</label>
+                <span class="field-hint">Liquid Glass dark or light surface mode</span>
+              </div>
+              <select id="setting-theme-select" class="select-input">
+                <option value="dark">Dark Glass</option>
+                <option value="light">Light Glass</option>
+              </select>
+            </div>
+
+            <div class="field-row">
+              <div class="field-label-group">
+                <label for="setting-default-duration" class="field-label">Default test duration (s)</label>
+                <span class="field-hint">Countdown target in seconds (5–7200)</span>
+              </div>
+              <input type="number" id="setting-default-duration" class="num-input tabular" min="5" max="7200" step="5" value="60" />
+            </div>
+
+            <div class="field-row">
+              <div class="field-label-group">
+                <label for="setting-default-scroll-speed" class="field-label">Default scroll speed (px/s)</label>
+                <span class="field-hint">Range 10 to 200 px/s</span>
+              </div>
+              <input type="number" id="setting-default-scroll-speed" class="num-input tabular" min="10" max="200" step="5" value="45" />
+            </div>
+
+            <div class="field-row">
+              <div class="field-label-group">
+                <label for="setting-default-scroll-mode" class="field-label">Default scroll direction</label>
+                <span class="field-hint">Direction pattern for auto-scroll</span>
+              </div>
+              <select id="setting-default-scroll-mode" class="select-input">
+                <option value="bounce">Bounce Up / Down</option>
+                <option value="down">Downward</option>
+                <option value="up">Upward</option>
+              </select>
+            </div>
+
+            <div class="field-row">
+              <div class="field-label-group">
+                <label for="setting-default-autostop" class="field-label">Auto-stop at 00:00</label>
+                <span class="field-hint">Automatically stop test when countdown ends</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="setting-default-autostop" checked />
+                <span class="switch-track"><span class="switch-thumb"></span></span>
+              </label>
+            </div>
+
+            <div class="field-row">
+              <div class="field-label-group">
+                <label for="setting-default-repeat" class="field-label">Repeat playback</label>
+                <span class="field-hint">Loop supported video streams until timer finishes</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="setting-default-repeat" />
+                <span class="switch-track"><span class="switch-thumb"></span></span>
+              </label>
+            </div>
+
+            <div class="field-row">
+              <div class="field-label-group">
+                <label for="setting-default-muted" class="field-label">Muted autoplay start</label>
+                <span class="field-hint">Required by most mobile browsers for autoplay</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="setting-default-muted" checked />
+                <span class="switch-track"><span class="switch-thumb"></span></span>
+              </label>
+            </div>
+          </section>
+
+          <section class="glass-panel">
+            <h2 class="block-title">Database &amp; Local Storage</h2>
+            <p class="section-subtitle" style="margin-bottom: 14px;">
+              Sessions, event logs, and settings are persisted locally using browser IndexedDB (<code class="mono">VPAT_DB</code>) synchronized with LocalStorage.
+            </p>
+
+            <div class="field-row" style="border-bottom: 1px solid var(--divider); padding-bottom: 12px;">
+              <div class="field-label-group">
+                <span class="field-label">Storage Connection</span>
+                <span id="db-status-detail" class="field-hint">Checking IndexedDB &amp; LocalStorage...</span>
+              </div>
+              <button type="button" id="settings-verify-db-btn" class="btn btn-glass btn-sm">Verify Storage</button>
+            </div>
+
+            <div class="field-row" style="border-bottom: 1px solid var(--divider); padding: 12px 0;">
+              <div class="field-label-group">
+                <span class="field-label">Clear Session History</span>
+                <span class="field-hint">Delete all saved session history records</span>
+              </div>
+              <button type="button" id="settings-clear-history-btn" class="btn btn-danger-soft btn-sm">Clear History</button>
+            </div>
+
+            <div id="settings-clear-confirm" class="confirm-inline">
+              <span style="font-size: 13px; color: var(--warning);">Delete all saved sessions?</span>
+              <button type="button" id="settings-clear-yes" class="btn btn-danger-soft btn-sm">Yes, Clear</button>
+              <button type="button" id="settings-clear-no" class="btn btn-glass btn-sm">Cancel</button>
+            </div>
+
+            <div class="field-row" style="padding-top: 12px;">
+              <div class="field-label-group">
+                <span class="field-label">Reset App Settings</span>
+                <span class="field-hint">Restore theme, duration, and scroll defaults</span>
+              </div>
+              <button type="button" id="settings-reset-btn" class="btn btn-glass btn-sm">Reset Settings</button>
+            </div>
+
+            <div id="settings-reset-confirm" class="confirm-inline">
+              <span style="font-size: 13px; color: var(--warning);">Restore default settings?</span>
+              <button type="button" id="settings-reset-yes" class="btn btn-primary btn-sm">Restore Defaults</button>
+              <button type="button" id="settings-reset-no" class="btn btn-glass btn-sm">Cancel</button>
+            </div>
+
+            <div id="settings-feedback" class="notice-banner is-info" style="margin-top: 16px;">
+              <div id="settings-feedback-text"></div>
+            </div>
+          </section>
+        </div>
+      </section>
+    </div>
+
+    <!-- Mobile Floating Glass Bottom Navigation -->
+    <nav class="bottom-dock-wrap" aria-label="Mobile Bottom Navigation">
+      <div class="bottom-dock">
+        <button type="button" class="dock-tab is-active" data-nav="tester">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="6 3 20 12 6 21 6 3"></polygon>
+          </svg>
+          <span>Tester</span>
+        </button>
+        <button type="button" class="dock-tab" data-nav="dashboard">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="7" height="9" x="3" y="3" rx="1"></rect>
+            <rect width="7" height="5" x="14" y="3" rx="1"></rect>
+            <rect width="7" height="9" x="14" y="12" rx="1"></rect>
+            <rect width="7" height="5" x="3" y="16" rx="1"></rect>
+          </svg>
+          <span>Dashboard</span>
+        </button>
+        <button type="button" class="dock-tab" data-nav="history">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+            <path d="M3 3v5h5"></path>
+            <path d="M12 7v5l4 2"></path>
+          </svg>
+          <span>History</span>
+        </button>
+        <button type="button" class="dock-tab" data-nav="settings">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+          <span>Settings</span>
+        </button>
+      </div>
+    </nav>
+
+    <script>
+      (function () {
+        'use strict';
+
+        /* =========================================================
+           1. Database Layer (IndexedDB VPAT_DB + LocalStorage Sync)
+           ========================================================= */
+        var SETTINGS_KEY = 'vpat_settings_v1';
+        var HISTORY_KEY = 'vpat_history_v1';
+        var DB_NAME = 'VPAT_DB';
+        var DB_VERSION = 1;
+
+        var DEFAULT_SETTINGS = {
+          theme: 'dark',
+          targetDuration: 60,
+          autoStop: true,
+          repeatPlayback: false,
+          mutedStart: true,
+          autoScroll: false,
+          scrollMode: 'bounce',
+          scrollSpeed: 45
+        };
+
+        var dbInstance = null;
+        var dbStatus = 'Initializing...';
+
+        function openDatabase() {
+          return new Promise(function (resolve) {
+            if (!('indexedDB' in window)) {
+              dbStatus = 'LocalStorage active (IndexedDB unsupported)';
+              resolve(null);
+              return;
+            }
+            try {
+              var req = window.indexedDB.open(DB_NAME, DB_VERSION);
+              req.onupgradeneeded = function (event) {
+                var db = event.target.result;
+                if (!db.objectStoreNames.contains('sessions')) {
+                  var sessionStore = db.createObjectStore('sessions', { keyPath: 'id' });
+                  sessionStore.createIndex('startedAt', 'startedAt', { unique: false });
+                }
+                if (!db.objectStoreNames.contains('settings')) {
+                  db.createObjectStore('settings', { keyPath: 'key' });
+                }
+              };
+              req.onsuccess = function (event) {
+                dbInstance = event.target.result;
+                dbStatus = 'IndexedDB Connected · LocalStorage Synced';
+                resolve(dbInstance);
+              };
+              req.onerror = function () {
+                dbStatus = 'LocalStorage Fallback (IndexedDB blocked)';
+                resolve(null);
+              };
+            } catch (err) {
+              dbStatus = 'LocalStorage Fallback';
+              resolve(null);
+            }
+          });
+        }
+
+        function idbPutSession(entry) {
+          if (!dbInstance) return Promise.resolve();
+          return new Promise(function (resolve) {
+            try {
+              var tx = dbInstance.transaction(['sessions'], 'readwrite');
+              tx.objectStore('sessions').put(entry);
+              tx.oncomplete = function () { resolve(); };
+              tx.onerror = function () { resolve(); };
+            } catch (e) {
+              resolve();
+            }
+          });
+        }
+
+        function idbDeleteSession(id) {
+          if (!dbInstance) return Promise.resolve();
+          return new Promise(function (resolve) {
+            try {
+              var tx = dbInstance.transaction(['sessions'], 'readwrite');
+              tx.objectStore('sessions').delete(id);
+              tx.oncomplete = function () { resolve(); };
+              tx.onerror = function () { resolve(); };
+            } catch (e) {
+              resolve();
+            }
+          });
+        }
+
+        function idbClearSessions() {
+          if (!dbInstance) return Promise.resolve();
+          return new Promise(function (resolve) {
+            try {
+              var tx = dbInstance.transaction(['sessions'], 'readwrite');
+              tx.objectStore('sessions').clear();
+              tx.oncomplete = function () { resolve(); };
+              tx.onerror = function () { resolve(); };
+            } catch (e) {
+              resolve();
+            }
+          });
+        }
+
+        function idbGetAllSessions() {
+          if (!dbInstance) return Promise.resolve(null);
+          return new Promise(function (resolve) {
+            try {
+              var tx = dbInstance.transaction(['sessions'], 'readonly');
+              var req = tx.objectStore('sessions').getAll();
+              req.onsuccess = function () {
+                var list = Array.isArray(req.result) ? req.result : [];
+                list.sort(function (a, b) {
+                  return new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime();
+                });
+                resolve(list);
+              };
+              req.onerror = function () { resolve(null); };
+            } catch (e) {
+              resolve(null);
+            }
+          });
+        }
+
+        function idbSaveSettings(nextSettings) {
+          if (!dbInstance) return Promise.resolve();
+          return new Promise(function (resolve) {
+            try {
+              var tx = dbInstance.transaction(['settings'], 'readwrite');
+              tx.objectStore('settings').put({ key: 'app_settings', value: nextSettings });
+              tx.oncomplete = function () { resolve(); };
+              tx.onerror = function () { resolve(); };
+            } catch (e) {
+              resolve();
+            }
+          });
+        }
+
+        function loadSettingsSync() {
+          try {
+            var raw = localStorage.getItem(SETTINGS_KEY);
+            if (!raw) return Object.assign({}, DEFAULT_SETTINGS);
+            return Object.assign({}, DEFAULT_SETTINGS, JSON.parse(raw));
+          } catch (err) {
+            return Object.assign({}, DEFAULT_SETTINGS);
+          }
+        }
+
+        function saveSettings(next) {
+          try {
+            localStorage.setItem(SETTINGS_KEY, JSON.stringify(next));
+          } catch (err) {
+            addLog('Could not persist settings to LocalStorage.', 'warn');
+          }
+          idbSaveSettings(next);
+        }
+
+        function loadHistorySync() {
+          try {
+            var raw = localStorage.getItem(HISTORY_KEY);
+            if (!raw) return [];
+            var parsed = JSON.parse(raw);
+            return Array.isArray(parsed) ? parsed : [];
+          } catch (err) {
+            return [];
+          }
+        }
+
+        function saveHistorySync(items) {
+          try {
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(items.slice(0, 150)));
+          } catch (err) {
+            addLog('Could not persist history to LocalStorage.', 'warn');
+          }
+        }
+
+        /* =========================================================
+           2. Application State
+           ========================================================= */
+        var settings = loadSettingsSync();
+        var historyItems = loadHistorySync();
+
+        var state = {
+          activeView: 'tester',
+          platform: 'youtube',
+          url: '',
+          parsedMedia: null,
+          sessionStatus: 'Idle',
+          playerStateLabel: 'Idle',
+          isPlayingVerified: false,
+          isPortraitAspect: false,
+          isMuted: true,
+          playbackRate: 1,
+          sessionElapsedMs: 0,
+          verifiedPlaybackMs: 0,
+          repeatCount: 0,
+          sessionStartTime: null,
+          lastTickAt: null,
+          viewportVisiblePct: 100,
+          scrollDirectionSign: 1,
+          scrollCarry: 0,
+          ytApiReady: false,
+          ytApiLoading: false,
+          ytPlayer: null,
+          htmlVideo: null,
+          currentLogs: [],
+          historyFilter: 'all',
+          historySearch: ''
+        };
+
+        var tickInterval = null;
+        var scrollRafId = null;
+        var lastScrollFrameAt = null;
+        var ytLoadTimeout = null;
+
+        /* =========================================================
+           3. DOM References
+           ========================================================= */
+        var els = {
+          themeToggleBtn: document.getElementById('theme-toggle-btn'),
+          themeIconSun: document.getElementById('theme-icon-sun'),
+          themeIconMoon: document.getElementById('theme-icon-moon'),
+          themeLabel: document.getElementById('theme-label'),
+          metaThemeColor: document.getElementById('meta-theme-color'),
+
+          navButtons: document.querySelectorAll('[data-nav]'),
+          views: {
+            tester: document.getElementById('view-tester'),
+            dashboard: document.getElementById('view-dashboard'),
+            history: document.getElementById('view-history'),
+            settings: document.getElementById('view-settings')
+          },
+
+          platformTabs: document.querySelectorAll('[data-platform]'),
+          urlForm: document.getElementById('url-form'),
+          urlInput: document.getElementById('video-url-input'),
+          pasteUrlBtn: document.getElementById('paste-url-btn'),
+          clearUrlBtn: document.getElementById('clear-url-btn'),
+
+          compatStatus: document.getElementById('compat-status'),
+          compatPlatformDetail: document.getElementById('compat-platform-detail'),
+          compatTelemetryDetail: document.getElementById('compat-telemetry-detail'),
+          testerNotice: document.getElementById('tester-notice'),
+          testerNoticeText: document.getElementById('tester-notice-text'),
+          testerNoticeActions: document.getElementById('tester-notice-actions'),
+
+          playerStage: document.getElementById('player-stage'),
+          playerEmpty: document.getElementById('player-empty'),
+          playerLoading: document.getElementById('player-loading'),
+          playerLoadingText: document.getElementById('player-loading-text'),
+          playerMount: document.getElementById('player-mount'),
+          viewportVisibilityLabel: document.getElementById('viewport-visibility-label'),
+          mediaPositionLabel: document.getElementById('media-position-label'),
+          playerResolutionLabel: document.getElementById('player-resolution-label'),
+          btnAspectToggle: document.getElementById('btn-aspect-toggle'),
+          btnMuteToggle: document.getElementById('btn-mute-toggle'),
+          selectPlaybackRate: document.getElementById('select-playback-rate'),
+          externalOpenLink: document.getElementById('external-open-link'),
+
+          metricPlaybackTime: document.getElementById('metric-playback-time'),
+          metricPlaybackNote: document.getElementById('metric-playback-note'),
+          metricSessionTime: document.getElementById('metric-session-time'),
+          metricSessionStart: document.getElementById('metric-session-start'),
+          metricCountdown: document.getElementById('metric-countdown'),
+          metricTargetLabel: document.getElementById('metric-target-label'),
+          metricStatus: document.getElementById('metric-status'),
+          metricStatusDot: document.getElementById('metric-status-dot'),
+          metricStatusText: document.getElementById('metric-status-text'),
+          metricRepeatCount: document.getElementById('metric-repeat-count'),
+          sessionProgressFill: document.getElementById('session-progress-fill'),
+
+          btnStart: document.getElementById('btn-start-test'),
+          btnPause: document.getElementById('btn-pause-test'),
+          btnStop: document.getElementById('btn-stop-test'),
+          btnReset: document.getElementById('btn-reset-test'),
+
+          presetBtns: document.querySelectorAll('.preset-btn'),
+          inputTargetDuration: document.getElementById('input-target-duration'),
+          toggleAutoStop: document.getElementById('toggle-auto-stop'),
+          toggleRepeat: document.getElementById('toggle-repeat'),
+          toggleMutedStart: document.getElementById('toggle-muted-start'),
+          toggleAutoScroll: document.getElementById('toggle-auto-scroll'),
+          selectScrollMode: document.getElementById('select-scroll-mode'),
+          rangeScrollSpeed: document.getElementById('range-scroll-speed'),
+          scrollSpeedReadout: document.getElementById('scroll-speed-readout'),
+          btnScrollUp: document.getElementById('btn-scroll-up'),
+          btnScrollDown: document.getElementById('btn-scroll-down'),
+          btnScrollPlayer: document.getElementById('btn-scroll-player'),
+          scrollYReadout: document.getElementById('scroll-y-readout'),
+
+          sessionLogList: document.getElementById('session-log-list'),
+          btnCopyLog: document.getElementById('btn-copy-log'),
+          btnClearLog: document.getElementById('btn-clear-log'),
+
+          dashCurrentSession: document.getElementById('dash-current-session'),
+          dashVerifiedSub: document.getElementById('dash-verified-sub'),
+          dashTotalDuration: document.getElementById('dash-total-duration'),
+          dashSessionsCount: document.getElementById('dash-sessions-count'),
+          dashPlatform: document.getElementById('dash-platform'),
+          dashCompatNote: document.getElementById('dash-compat-note'),
+          dashStatus: document.getElementById('dash-status'),
+          dashStartTime: document.getElementById('dash-start-time'),
+          dashCurrentUrl: document.getElementById('dash-current-url'),
+          dashGotoTester: document.getElementById('dash-goto-tester'),
+          dashViewAllHistory: document.getElementById('dash-view-all-history'),
+          dashRecentHistory: document.getElementById('dash-recent-history'),
+
+          historyExportCsv: document.getElementById('history-export-csv'),
+          historyExportJson: document.getElementById('history-export-json'),
+          historyClearTrigger: document.getElementById('history-clear-trigger'),
+          historyClearConfirm: document.getElementById('history-clear-confirm'),
+          historyClearYes: document.getElementById('history-clear-yes'),
+          historyClearNo: document.getElementById('history-clear-no'),
+          historyFilterBtns: document.querySelectorAll('[data-history-filter]'),
+          historySearchInput: document.getElementById('history-search-input'),
+          fullHistoryList: document.getElementById('full-history-list'),
+
+          settingThemeSelect: document.getElementById('setting-theme-select'),
+          settingDefaultDuration: document.getElementById('setting-default-duration'),
+          settingDefaultScrollSpeed: document.getElementById('setting-default-scroll-speed'),
+          settingDefaultScrollMode: document.getElementById('setting-default-scroll-mode'),
+          settingDefaultAutoStop: document.getElementById('setting-default-autostop'),
+          settingDefaultRepeat: document.getElementById('setting-default-repeat'),
+          settingDefaultMuted: document.getElementById('setting-default-muted'),
+          dbStatusDetail: document.getElementById('db-status-detail'),
+          settingsVerifyDbBtn: document.getElementById('settings-verify-db-btn'),
+          settingsClearHistoryBtn: document.getElementById('settings-clear-history-btn'),
+          settingsClearConfirm: document.getElementById('settings-clear-confirm'),
+          settingsClearYes: document.getElementById('settings-clear-yes'),
+          settingsClearNo: document.getElementById('settings-clear-no'),
+          settingsResetBtn: document.getElementById('settings-reset-btn'),
+          settingsResetConfirm: document.getElementById('settings-reset-confirm'),
+          settingsResetYes: document.getElementById('settings-reset-yes'),
+          settingsResetNo: document.getElementById('settings-reset-no'),
+          settingsFeedback: document.getElementById('settings-feedback'),
+          settingsFeedbackText: document.getElementById('settings-feedback-text')
+        };
+
+        /* =========================================================
+           4. Formatting, Logging & Notifications
+           ========================================================= */
+        function pad2(n) {
+          return n < 10 ? '0' + n : '' + n;
+        }
+
+        function formatDuration(ms) {
+          var totalSec = Math.max(0, Math.floor(ms / 1000));
+          var hrs = Math.floor(totalSec / 3600);
+          var mins = Math.floor((totalSec % 3600) / 60);
+          var secs = totalSec % 60;
+          if (hrs > 0) {
+            return pad2(hrs) + ':' + pad2(mins) + ':' + pad2(secs);
+          }
+          return pad2(mins) + ':' + pad2(secs);
+        }
+
+        function formatClock(dateObj) {
+          if (!dateObj) return 'Not started';
+          var d = dateObj instanceof Date ? dateObj : new Date(dateObj);
+          return pad2(d.getHours()) + ':' + pad2(d.getMinutes()) + ':' + pad2(d.getSeconds());
+        }
+
+        function formatDateTime(isoStr) {
+          var d = new Date(isoStr);
+          if (isNaN(d.getTime())) return 'Unknown';
+          return d.toLocaleString(undefined, {
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+        }
+
+        function addLog(message, level) {
+          var stamp = formatClock(new Date());
+          state.currentLogs.unshift({ time: stamp, message: message, level: level || 'info' });
+          if (state.currentLogs.length > 100) {
+            state.currentLogs.length = 100;
+          }
+
+          var list = els.sessionLogList;
+          var item = document.createElement('div');
+          item.className = 'log-item';
+
+          var timeSpan = document.createElement('span');
+          timeSpan.className = 'log-time tabular';
+          timeSpan.textContent = stamp;
+
+          var msgSpan = document.createElement('span');
+          msgSpan.className = 'log-msg' + (level ? ' level-' + level : '');
+          msgSpan.textContent = message;
+
+          item.appendChild(timeSpan);
+          item.appendChild(msgSpan);
+          list.insertBefore(item, list.firstChild);
+
+          while (list.children.length > 100) {
+            list.removeChild(list.lastChild);
+          }
+        }
+
+        function showNotice(message, type, actionButtons) {
+          els.testerNotice.className = 'notice-banner is-visible is-' + (type || 'info');
+          els.testerNoticeText.textContent = message;
+          els.testerNoticeActions.innerHTML = '';
+
+          if (Array.isArray(actionButtons) && actionButtons.length > 0) {
+            els.testerNoticeActions.style.display = 'flex';
+            actionButtons.forEach(function (act) {
+              var b = document.createElement('button');
+              b.type = 'button';
+              b.className = 'btn btn-glass btn-sm';
+              b.textContent = act.label;
+              b.addEventListener('click', act.onClick);
+              els.testerNoticeActions.appendChild(b);
+            });
+          } else {
+            els.testerNoticeActions.style.display = 'none';
+          }
+        }
+
+        function hideNotice() {
+          els.testerNotice.className = 'notice-banner';
+          els.testerNoticeText.textContent = '';
+          els.testerNoticeActions.innerHTML = '';
+          els.testerNoticeActions.style.display = 'none';
+        }
+
+        function setLoading(isLoading, text) {
+          if (isLoading) {
+            els.playerLoadingText.textContent = text || 'Loading player...';
+            els.playerLoading.classList.add('is-visible');
+          } else {
+            els.playerLoading.classList.remove('is-visible');
+          }
+        }
+
+        /* =========================================================
+           5. Theme & Navigation
+           ========================================================= */
+        function applyTheme(theme) {
+          var nextTheme = theme === 'light' ? 'light' : 'dark';
+          document.documentElement.setAttribute('data-theme', nextTheme);
+          els.metaThemeColor.setAttribute('content', nextTheme === 'dark' ? '#090d16' : '#eef3f8');
+          if (nextTheme === 'dark') {
+            els.themeIconSun.style.display = 'inline';
+            els.themeIconMoon.style.display = 'none';
+            els.themeLabel.textContent = 'Light Mode';
+          } else {
+            els.themeIconSun.style.display = 'none';
+            els.themeIconMoon.style.display = 'inline';
+            els.themeLabel.textContent = 'Dark Mode';
+          }
+          els.settingThemeSelect.value = nextTheme;
+          settings.theme = nextTheme;
+          saveSettings(settings);
+        }
+
+        els.themeToggleBtn.addEventListener('click', function () {
+          applyTheme(settings.theme === 'dark' ? 'light' : 'dark');
+        });
+
+        function switchView(viewName) {
+          if (!els.views[viewName]) return;
+          state.activeView = viewName;
+          Object.keys(els.views).forEach(function (key) {
+            els.views[key].classList.toggle('is-visible', key === viewName);
+          });
+          els.navButtons.forEach(function (btn) {
+            btn.classList.toggle('is-active', btn.getAttribute('data-nav') === viewName);
+          });
+          if (viewName === 'dashboard' || viewName === 'history' || viewName === 'settings') {
+            renderDashboardAndHistory();
+            updateDbStatusReadout();
+          }
+        }
+
+        els.navButtons.forEach(function (btn) {
+          btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            switchView(btn.getAttribute('data-nav'));
+          });
+        });
+
+        els.dashGotoTester.addEventListener('click', function () {
+          switchView('tester');
+        });
+
+        els.dashViewAllHistory.addEventListener('click', function () {
+          switchView('history');
+        });
+
+        /* =========================================================
+           6. URL Validation & Platform Auto-Detection
+           ========================================================= */
+        function extractYouTubeId(rawUrl) {
+          var u;
+          try {
+            u = new URL(rawUrl);
+          } catch (e) {
+            return null;
+          }
+          var host = u.hostname.replace(/^www\./, '').toLowerCase();
+          if (host === 'youtu.be') {
+            var idShort = u.pathname.split('/').filter(Boolean)[0];
+            return idShort && /^[a-zA-Z0-9_-]{11}$/.test(idShort) ? idShort : null;
+          }
+          if (host === 'youtube.com' || host === 'm.youtube.com' || host === 'music.youtube.com' || host === 'youtube-nocookie.com') {
+            var vParam = u.searchParams.get('v');
+            if (vParam && /^[a-zA-Z0-9_-]{11}$/.test(vParam)) return vParam;
+            var parts = u.pathname.split('/').filter(Boolean);
+            if (parts.length >= 2 && (parts[0] === 'shorts' || parts[0] === 'embed' || parts[0] === 'live' || parts[0] === 'v')) {
+              if (/^[a-zA-Z0-9_-]{11}$/.test(parts[1])) return parts[1];
+            }
+          }
+          return null;
+        }
+
+        function detectUrlPlatform(rawUrl) {
+          try {
+            var u = new URL((rawUrl || '').trim());
+            var host = u.hostname.replace(/^www\./, '').toLowerCase();
+            if (extractYouTubeId(rawUrl)) return 'youtube';
+            if (host === 'facebook.com' || host === 'm.facebook.com' || host === 'web.facebook.com' || host === 'fb.watch' || host === 'fb.com') {
+              return 'facebook';
+            }
+            return 'custom';
+          } catch (e) {
+            return null;
+          }
+        }
+
+        function validatePlatformUrl(platform, rawUrl) {
+          var trimmed = (rawUrl || '').trim();
+          if (!trimmed) {
+            return { valid: false, error: 'Please paste a video URL before loading.' };
+          }
+
+          var parsed;
+          try {
+            parsed = new URL(trimmed);
+          } catch (err) {
+            return { valid: false, error: 'Invalid URL format. Include https:// at the beginning of the link.' };
+          }
+
+          if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+            return { valid: false, error: 'Only http:// and https:// video URLs are supported.' };
+          }
+
+          var host = parsed.hostname.replace(/^www\./, '').toLowerCase();
+          var detected = detectUrlPlatform(trimmed);
+
+          if (platform === 'youtube') {
+            var ytId = extractYouTubeId(trimmed);
+            if (!ytId) {
+              return {
+                valid: false,
+                detectedPlatform: detected !== 'youtube' ? detected : null,
+                error: 'Could not extract a valid 11-character YouTube Video ID (supports watch?v=..., youtu.be/..., /shorts/..., /live/...).'
+              };
+            }
+            var isShort = parsed.pathname.indexOf('/shorts/') !== -1;
+            return {
+              valid: true,
+              platform: 'youtube',
+              platformName: 'YouTube',
+              videoId: ytId,
+              isPortraitSuggested: isShort,
+              cleanUrl: trimmed,
+              embedType: 'youtube-api',
+              telemetryPrecision: 'Full PlayerState API'
+            };
+          }
+
+          if (platform === 'facebook') {
+            var isFbHost =
+              host === 'facebook.com' ||
+              host === 'm.facebook.com' ||
+              host === 'web.facebook.com' ||
+              host === 'fb.watch' ||
+              host === 'fb.com';
+            if (!isFbHost) {
+              return {
+                valid: false,
+                detectedPlatform: detected !== 'facebook' ? detected : null,
+                error: 'Enter a valid Facebook video URL (facebook.com/watch?v=..., .../videos/..., .../reel/..., or fb.watch/...).'
+              };
+            }
+            var isShortFb = host === 'fb.watch' || parsed.pathname.indexOf('/share/') !== -1;
+            var isReel = parsed.pathname.indexOf('/reel/') !== -1;
+            return {
+              valid: true,
+              platform: 'facebook',
+              platformName: 'Facebook',
+              cleanUrl: trimmed,
+              isShortLink: isShortFb,
+              isPortraitSuggested: isReel,
+              embedType: 'facebook-plugin',
+              telemetryPrecision: 'Cross-Origin Embed (Unverified State)'
+            };
+          }
+
+          var pathnameLower = parsed.pathname.toLowerCase();
+          var isDirectMedia =
+            pathnameLower.endsWith('.mp4') ||
+            pathnameLower.endsWith('.webm') ||
+            pathnameLower.endsWith('.ogg') ||
+            pathnameLower.endsWith('.mov') ||
+            pathnameLower.endsWith('.m4v');
+
+          return {
+            valid: true,
+            platform: 'custom',
+            platformName: 'Custom URL',
+            cleanUrl: trimmed,
+            isPortraitSuggested: false,
+            embedType: isDirectMedia ? 'html5-video' : 'html5-video-probe',
+            telemetryPrecision: isDirectMedia ? 'Native HTML5 Media Events' : 'HTML5 Media Probe'
+          };
+        }
+
+        function setPlatform(platform) {
+          state.platform = platform;
+          els.platformTabs.forEach(function (tab) {
+            var active = tab.getAttribute('data-platform') === platform;
+            tab.classList.toggle('is-active', active);
+            tab.setAttribute('aria-selected', active ? 'true' : 'false');
+          });
+
+          if (platform === 'youtube') {
+            els.urlInput.placeholder = 'https://www.youtube.com/watch?v=... or https://youtu.be/...';
+            els.compatPlatformDetail.textContent = 'YouTube IFrame Player API';
+            els.compatTelemetryDetail.textContent = 'Real PlayerState verification';
+          } else if (platform === 'facebook') {
+            els.urlInput.placeholder = 'https://www.facebook.com/watch?v=... or .../videos/...';
+            els.compatPlatformDetail.textContent = 'Facebook Embedded Video Plugin';
+            els.compatTelemetryDetail.textContent = 'Cross-origin embed (browser verified)';
+          } else {
+            els.urlInput.placeholder = 'https://example.com/video.mp4 (.mp4, .webm, .ogg)';
+            els.compatPlatformDetail.textContent = 'Native HTML5 Video Element';
+            els.compatTelemetryDetail.textContent = 'Real media playback events';
+          }
+
+          if (!state.parsedMedia) {
+            els.compatStatus.className = 'compat-status-text';
+            els.compatStatus.textContent = 'Ready for URL';
+          }
+          hideNotice();
+          updateMetricsUI();
+        }
+
+        els.platformTabs.forEach(function (tab) {
+          tab.addEventListener('click', function () {
+            setPlatform(tab.getAttribute('data-platform'));
+          });
+        });
+
+        /* =========================================================
+           7. Player Engine (YouTube API, Facebook Plugin, HTML5, Frame)
+           ========================================================= */
+        function setAspectRatio(isPortrait) {
+          state.isPortraitAspect = !!isPortrait;
+          els.playerStage.classList.toggle('is-portrait', state.isPortraitAspect);
+          els.btnAspectToggle.textContent = state.isPortraitAspect ? '9:16 Reels' : '16:9 View';
+        }
+
+        els.btnAspectToggle.addEventListener('click', function () {
+          setAspectRatio(!state.isPortraitAspect);
+          addLog('Player aspect ratio switched to ' + (state.isPortraitAspect ? '9:16 vertical' : '16:9 landscape') + '.');
+        });
+
+        function updatePlayerControlsAvailability(hasApiControl) {
+          els.btnMuteToggle.disabled = !hasApiControl;
+          els.selectPlaybackRate.disabled = !hasApiControl;
+          els.btnMuteToggle.textContent = state.isMuted ? 'Muted' : 'Audio On';
+          els.selectPlaybackRate.value = String(state.playbackRate);
+        }
+
+        els.btnMuteToggle.addEventListener('click', function () {
+          state.isMuted = !state.isMuted;
+          if (state.ytPlayer) {
+            try {
+              if (state.isMuted && typeof state.ytPlayer.mute === 'function') state.ytPlayer.mute();
+              if (!state.isMuted && typeof state.ytPlayer.unMute === 'function') state.ytPlayer.unMute();
+            } catch (e) {}
+          }
+          if (state.htmlVideo) {
+            state.htmlVideo.muted = state.isMuted;
+          }
+          els.btnMuteToggle.textContent = state.isMuted ? 'Muted' : 'Audio On';
+          addLog(state.isMuted ? 'Player audio muted.' : 'Player audio unmuted.');
+        });
+
+        els.selectPlaybackRate.addEventListener('change', function () {
+          var rate = parseFloat(els.selectPlaybackRate.value) || 1;
+          state.playbackRate = rate;
+          if (state.ytPlayer && typeof state.ytPlayer.setPlaybackRate === 'function') {
+            try {
+              state.ytPlayer.setPlaybackRate(rate);
+            } catch (e) {}
+          }
+          if (state.htmlVideo) {
+            state.htmlVideo.playbackRate = rate;
+          }
+          addLog('Playback rate set to ' + rate + 'x.');
+        });
+
+        function destroyCurrentPlayer() {
+          if (ytLoadTimeout) {
+            clearTimeout(ytLoadTimeout);
+            ytLoadTimeout = null;
+          }
+          if (state.ytPlayer && typeof state.ytPlayer.destroy === 'function') {
+            try {
+              state.ytPlayer.destroy();
+            } catch (e) {}
+          }
+          state.ytPlayer = null;
+          if (state.htmlVideo) {
+            try {
+              state.htmlVideo.pause();
+              state.htmlVideo.removeAttribute('src');
+              state.htmlVideo.load();
+            } catch (e) {}
+          }
+          state.htmlVideo = null;
+          els.playerMount.innerHTML = '';
+          els.playerMount.style.display = 'none';
+          state.isPlayingVerified = false;
+          els.mediaPositionLabel.textContent = '00:00 / --:--';
+          updatePlayerControlsAvailability(false);
+        }
+
+        function ensureYouTubeApiLoaded(callback) {
+          if (window.YT && typeof window.YT.Player === 'function') {
+            state.ytApiReady = true;
+            callback();
+            return;
+          }
+
+          window._vpatYtQueue = window._vpatYtQueue || [];
+          window._vpatYtQueue.push(callback);
+
+          if (!window.onYouTubeIframeAPIReady) {
+            window.onYouTubeIframeAPIReady = function () {
+              state.ytApiReady = true;
+              state.ytApiLoading = false;
+              var q = window._vpatYtQueue || [];
+              window._vpatYtQueue = [];
+              q.forEach(function (fn) {
+                fn();
+              });
+            };
+          }
+
+          if (!state.ytApiLoading) {
+            state.ytApiLoading = true;
+            var tag = document.createElement('script');
+            tag.src = 'https://www.youtube.com/iframe_api';
+            tag.async = true;
+            tag.onerror = function () {
+              state.ytApiLoading = false;
+              setLoading(false);
+              showNotice('Failed to load the official YouTube IFrame API script. Check network connectivity or content blockers.', 'error');
+              addLog('YouTube IFrame API script failed to load.', 'error');
+            };
+            document.head.appendChild(tag);
+          }
+        }
+
+        function loadYouTubePlayer(parsed) {
+          destroyCurrentPlayer();
+          els.playerEmpty.style.display = 'none';
+          els.playerMount.style.display = 'block';
+          setAspectRatio(!!parsed.isPortraitSuggested);
+          setLoading(true, 'Connecting YouTube IFrame API...');
+
+          var mountDiv = document.createElement('div');
+          mountDiv.id = 'yt-player-mount';
+          els.playerMount.appendChild(mountDiv);
+
+          ytLoadTimeout = setTimeout(function () {
+            if (!state.ytApiReady) {
+              setLoading(false);
+              showNotice('YouTube IFrame API timed out. Verify internet connection or open the video externally.', 'warning');
+              addLog('YouTube API load timeout.', 'warn');
+            }
+          }, 9000);
+
+          ensureYouTubeApiLoaded(function () {
+            clearTimeout(ytLoadTimeout);
+            var playerVars = {
+              playsinline: 1,
+              rel: 0,
+              modestbranding: 1,
+              enablejsapi: 1
+            };
+            if (window.location && window.location.protocol && window.location.protocol.indexOf('http') === 0) {
+              playerVars.origin = window.location.origin;
+            }
+
+            try {
+              state.ytPlayer = new window.YT.Player('yt-player-mount', {
+                videoId: parsed.videoId,
+                width: '100%',
+                height: '100%',
+                playerVars: playerVars,
+                events: {
+                  onReady: function (event) {
+                    setLoading(false);
+                    state.isMuted = !!settings.mutedStart;
+                    if (state.isMuted && typeof event.target.mute === 'function') {
+                      event.target.mute();
+                    }
+                    state.playbackRate = 1;
+                    updatePlayerControlsAvailability(true);
+                    state.playerStateLabel = 'Ready';
+                    els.compatStatus.className = 'compat-status-text ok';
+                    els.compatStatus.textContent = 'Compatible · Embed Ready';
+                    var dur = typeof event.target.getDuration === 'function' ? Math.round(event.target.getDuration()) : 0;
+                    els.playerResolutionLabel.textContent = dur > 0 ? 'Duration ' + formatDuration(dur * 1000) : 'YouTube IFrame API ready';
+                    addLog('YouTube player ready (Video ID: ' + parsed.videoId + ').', 'success');
+                    updateMetricsUI();
+
+                    if (state.sessionStatus === 'Running') {
+                      event.target.playVideo();
+                    }
+                  },
+                  onStateChange: function (event) {
+                    var YTState = window.YT.PlayerState;
+                    if (event.data === YTState.PLAYING) {
+                      state.isPlayingVerified = true;
+                      state.playerStateLabel = 'Playing';
+                      var dur = typeof event.target.getDuration === 'function' ? Math.round(event.target.getDuration()) : 0;
+                      els.playerResolutionLabel.textContent = dur > 0 ? 'Duration ' + formatDuration(dur * 1000) : 'Playing via API';
+                      addLog('YouTube playback started.', 'success');
+                    } else if (event.data === YTState.PAUSED) {
+                      state.isPlayingVerified = false;
+                      state.playerStateLabel = 'Paused';
+                      addLog('YouTube playback paused.');
+                    } else if (event.data === YTState.BUFFERING) {
+                      state.isPlayingVerified = false;
+                      state.playerStateLabel = 'Buffering';
+                    } else if (event.data === YTState.ENDED) {
+                      state.isPlayingVerified = false;
+                      state.playerStateLabel = 'Ended';
+                      addLog('YouTube video reached end.');
+                      handleNaturalVideoEnd();
+                    } else if (event.data === YTState.CUED) {
+                      state.isPlayingVerified = false;
+                      state.playerStateLabel = 'Cued';
+                    }
+                    updateMetricsUI();
+                  },
+                  onError: function (event) {
+                    setLoading(false);
+                    state.isPlayingVerified = false;
+                    state.playerStateLabel = 'Embed Restricted';
+                    updatePlayerControlsAvailability(false);
+                    var code = event.data;
+                    var msg = 'YouTube player error (code ' + code + ').';
+                    if (code === 2) msg = 'Invalid YouTube video ID parameter.';
+                    if (code === 5) msg = 'HTML5 player error occurred for this video.';
+                    if (code === 100) msg = 'Video not found or marked private.';
+                    if (code === 101 || code === 150) {
+                      msg = 'Embedding is disabled by the video owner (Error ' + code + '). Open externally to test playback directly on YouTube.';
+                    }
+                    els.compatStatus.className = 'compat-status-text err';
+                    els.compatStatus.textContent = 'Embed Blocked (Code ' + code + ')';
+                    showNotice(msg, 'error');
+                    addLog(msg, 'error');
+                    updateMetricsUI();
+                  }
+                }
+              });
+            } catch (err) {
+              setLoading(false);
+              showNotice('Could not instantiate YouTube IFrame Player: ' + err.message, 'error');
+              addLog('YouTube player instantiation error: ' + err.message, 'error');
+            }
+          });
+        }
+
+        function loadFacebookPlayer(parsed) {
+          destroyCurrentPlayer();
+          els.playerEmpty.style.display = 'none';
+          els.playerMount.style.display = 'block';
+          setAspectRatio(!!parsed.isPortraitSuggested);
+          setLoading(true, 'Loading Facebook Video Embed...');
+
+          var iframe = document.createElement('iframe');
+          iframe.src =
+            'https://www.facebook.com/plugins/video.php?href=' +
+            encodeURIComponent(parsed.cleanUrl) +
+            '&show_text=false&t=0';
+          iframe.allow = 'autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share';
+          iframe.allowFullscreen = true;
+          iframe.title = 'Facebook Video Player';
+          iframe.style.width = '100%';
+          iframe.style.height = '100%';
+          iframe.style.border = 'none';
+
+          iframe.addEventListener('load', function () {
+            setLoading(false);
+            state.playerStateLabel = 'Embed Loaded';
+            state.isPlayingVerified = false;
+            els.compatStatus.className = 'compat-status-text warn';
+            els.compatStatus.textContent = 'Embed Loaded · Manual Verification';
+            els.playerResolutionLabel.textContent = 'Facebook Cross-Origin Plugin';
+            addLog('Facebook video plugin iframe loaded (cross-origin frame blocks automated playback state events).', 'warn');
+
+            if (parsed.isShortLink) {
+              showNotice(
+                'fb.watch and /share/ links redirect inside Facebook and may fail inside embedded iframes. Use a full facebook.com/watch?v=... URL or open externally.',
+                'warning'
+              );
+            } else {
+              showNotice(
+                'Facebook embeds run in a cross-origin frame: start playback directly inside the frame or open externally. Verified playback time stays 00:00 because Facebook does not expose iframe playback telemetry.',
+                'info'
+              );
+            }
+            updateMetricsUI();
+          });
+
+          iframe.addEventListener('error', function () {
+            setLoading(false);
+            state.playerStateLabel = 'Embed Error';
+            els.compatStatus.className = 'compat-status-text err';
+            els.compatStatus.textContent = 'Embed Unavailable';
+            showNotice('Facebook embed failed to load. Open the video in an external browser.', 'error');
+            addLog('Facebook embed iframe failed to load.', 'error');
+          });
+
+          els.playerMount.appendChild(iframe);
+        }
+
+        function loadCustomIframeFallback(url) {
+          destroyCurrentPlayer();
+          hideNotice();
+          els.playerEmpty.style.display = 'none';
+          els.playerMount.style.display = 'block';
+          setLoading(true, 'Loading web iframe embed...');
+
+          var iframe = document.createElement('iframe');
+          iframe.src = url;
+          iframe.allow = 'autoplay; fullscreen; picture-in-picture';
+          iframe.allowFullscreen = true;
+          iframe.title = 'Custom Embedded Player';
+          iframe.style.width = '100%';
+          iframe.style.height = '100%';
+          iframe.style.border = 'none';
+
+          iframe.addEventListener('load', function () {
+            setLoading(false);
+            state.playerStateLabel = 'IFrame Loaded';
+            els.compatStatus.className = 'compat-status-text warn';
+            els.compatStatus.textContent = 'Web IFrame Loaded · Unverified Telemetry';
+            els.playerResolutionLabel.textContent = 'Cross-origin custom iframe';
+            addLog('Custom URL loaded in fallback web iframe.');
+            updateMetricsUI();
+          });
+
+          iframe.addEventListener('error', function () {
+            setLoading(false);
+            state.playerStateLabel = 'Blocked';
+            showNotice('Target site blocked iframe embedding (X-Frame-Options / CSP). Use Open External.', 'error');
+            addLog('Custom web iframe blocked by target origin.', 'error');
+          });
+
+          els.playerMount.appendChild(iframe);
+        }
+
+        function loadCustomVideoPlayer(parsed) {
+          destroyCurrentPlayer();
+          els.playerEmpty.style.display = 'none';
+          els.playerMount.style.display = 'block';
+          setAspectRatio(false);
+          setLoading(true, 'Probing HTML5 video source...');
+
+          var video = document.createElement('video');
+          video.controls = true;
+          video.playsInline = true;
+          video.setAttribute('playsinline', '');
+          video.setAttribute('webkit-playsinline', '');
+          video.preload = 'metadata';
+          state.isMuted = !!settings.mutedStart;
+          video.muted = state.isMuted;
+          video.src = parsed.cleanUrl;
+
+          state.htmlVideo = video;
+
+          video.addEventListener('loadedmetadata', function () {
+            setLoading(false);
+            var w = video.videoWidth || 0;
+            var h = video.videoHeight || 0;
+            if (h > w && w > 0) {
+              setAspectRatio(true);
+            }
+            var dur = isFinite(video.duration) ? formatDuration(video.duration * 1000) : 'Live';
+            els.compatStatus.className = 'compat-status-text ok';
+            els.compatStatus.textContent = 'Compatible · HTML5 Video';
+            els.playerResolutionLabel.textContent = (w && h ? w + 'x' + h + ' · ' : '') + 'Duration ' + dur;
+            state.playerStateLabel = 'Ready';
+            updatePlayerControlsAvailability(true);
+            addLog('HTML5 video metadata loaded (' + (w && h ? w + 'x' + h : 'stream') + ').', 'success');
+            updateMetricsUI();
+          });
+
+          video.addEventListener('playing', function () {
+            setLoading(false);
+            state.isPlayingVerified = true;
+            state.playerStateLabel = 'Playing';
+            addLog('HTML5 video playing.', 'success');
+            updateMetricsUI();
+          });
+
+          video.addEventListener('pause', function () {
+            state.isPlayingVerified = false;
+            if (!video.ended) {
+              state.playerStateLabel = 'Paused';
+              addLog('HTML5 video paused.');
+              updateMetricsUI();
+            }
+          });
+
+          video.addEventListener('waiting', function () {
+            state.isPlayingVerified = false;
+            state.playerStateLabel = 'Buffering';
+            updateMetricsUI();
+          });
+
+          video.addEventListener('ended', function () {
+            state.isPlayingVerified = false;
+            state.playerStateLabel = 'Ended';
+            addLog('HTML5 video reached end.');
+            handleNaturalVideoEnd();
+            updateMetricsUI();
+          });
+
+          video.addEventListener('error', function () {
+            setLoading(false);
+            state.isPlayingVerified = false;
+            state.playerStateLabel = 'Media Error';
+            updatePlayerControlsAvailability(false);
+            els.compatStatus.className = 'compat-status-text err';
+            els.compatStatus.textContent = 'Direct HTML5 Stream Failed';
+            showNotice(
+              'The HTML5 <video> element could not decode this URL directly (requires a .mp4/.webm/.ogg file with CORS/range support). If this is a web player page, try loading it inside a web iframe or open it externally.',
+              'error',
+              [
+                {
+                  label: 'Try Web IFrame',
+                  onClick: function () {
+                    loadCustomIframeFallback(parsed.cleanUrl);
+                  }
+                }
+              ]
+            );
+            addLog('HTML5 video decode failed for URL.', 'error');
+            updateMetricsUI();
+          });
+
+          els.playerMount.appendChild(video);
+        }
+
+        function loadCurrentUrl() {
+          hideNotice();
+          var rawUrl = els.urlInput.value;
+          var parsed = validatePlatformUrl(state.platform, rawUrl);
+
+          if (!parsed.valid) {
+            els.compatStatus.className = 'compat-status-text err';
+            els.compatStatus.textContent = 'Invalid URL';
+            var actions = [];
+            if (parsed.detectedPlatform === 'youtube') {
+              actions.push({
+                label: 'Switch to YouTube',
+                onClick: function () {
+                  setPlatform('youtube');
+                  loadCurrentUrl();
+                }
+              });
+            } else if (parsed.detectedPlatform === 'facebook') {
+              actions.push({
+                label: 'Switch to Facebook',
+                onClick: function () {
+                  setPlatform('facebook');
+                  loadCurrentUrl();
+                }
+              });
+            }
+            showNotice(parsed.error, 'error', actions);
+            addLog('Validation failed: ' + parsed.error, 'error');
+            return false;
+          }
+
+          state.url = parsed.cleanUrl;
+          state.parsedMedia = parsed;
+          els.compatPlatformDetail.textContent = parsed.platformName;
+          els.compatTelemetryDetail.textContent = parsed.telemetryPrecision;
+          els.externalOpenLink.href = parsed.cleanUrl;
+          els.externalOpenLink.style.display = 'inline-flex';
+
+          if (parsed.platform === 'youtube') {
+            loadYouTubePlayer(parsed);
+          } else if (parsed.platform === 'facebook') {
+            loadFacebookPlayer(parsed);
+          } else {
+            loadCustomVideoPlayer(parsed);
+          }
+          updateMetricsUI();
+          return true;
+        }
+
+        els.urlForm.addEventListener('submit', function (e) {
+          e.preventDefault();
+          loadCurrentUrl();
+        });
+
+        els.pasteUrlBtn.addEventListener('click', function () {
+          if (!navigator.clipboard || typeof navigator.clipboard.readText !== 'function') {
+            showNotice('Clipboard read is unavailable in this browser context. Paste directly into the URL input.', 'warning');
+            els.urlInput.focus();
+            return;
+          }
+          navigator.clipboard
+            .readText()
+            .then(function (text) {
+              var trimmed = (text || '').trim();
+              if (!trimmed) {
+                showNotice('Clipboard is empty.', 'warning');
+                return;
+              }
+              els.urlInput.value = trimmed;
+              var detected = detectUrlPlatform(trimmed);
+              if (detected && detected !== state.platform) {
+                setPlatform(detected);
+                addLog('Pasted URL and auto-selected ' + detected + ' mode.');
+              } else {
+                hideNotice();
+                addLog('Pasted URL from clipboard.');
+              }
+            })
+            .catch(function () {
+              showNotice('Clipboard permission denied. Paste the URL manually into the input field.', 'warning');
+              els.urlInput.focus();
+            });
+        });
+
+        els.clearUrlBtn.addEventListener('click', function () {
+          els.urlInput.value = '';
+          hideNotice();
+          els.urlInput.focus();
+        });
+
+        /* =========================================================
+           8. Automation Test Engine (Timers, Repeat, Auto-Stop)
+           ========================================================= */
+        function handleNaturalVideoEnd() {
+          if (state.sessionStatus !== 'Running') return;
+          var targetMs = settings.targetDuration * 1000;
+          var remaining = targetMs - state.sessionElapsedMs;
+
+          if (settings.repeatPlayback && remaining > 500) {
+            if (state.parsedMedia && state.parsedMedia.platform === 'youtube' && state.ytPlayer) {
+              try {
+                state.ytPlayer.seekTo(0, true);
+                state.ytPlayer.playVideo();
+                state.repeatCount += 1;
+                addLog('Repeat playback triggered (Loop #' + state.repeatCount + ').', 'success');
+              } catch (e) {
+                addLog('Unable to repeat YouTube playback: ' + e.message, 'warn');
+              }
+            } else if (state.htmlVideo) {
+              try {
+                state.htmlVideo.currentTime = 0;
+                state.htmlVideo.play();
+                state.repeatCount += 1;
+                addLog('Repeat playback triggered (Loop #' + state.repeatCount + ').', 'success');
+              } catch (e) {
+                addLog('Unable to repeat HTML5 video: ' + e.message, 'warn');
+              }
+            } else {
+              addLog('Programmatic repeat is unavailable for cross-origin iframe embeds.', 'warn');
+            }
+          }
+        }
+
+        function triggerPlayerPlay() {
+          if (!state.parsedMedia) return;
+          if (state.parsedMedia.platform === 'youtube' && state.ytPlayer && typeof state.ytPlayer.playVideo === 'function') {
+            try {
+              if (settings.mutedStart && typeof state.ytPlayer.mute === 'function') {
+                state.ytPlayer.mute();
+                state.isMuted = true;
+              }
+              state.ytPlayer.playVideo();
+            } catch (e) {
+              addLog('YouTube play command blocked; tap play inside the video frame.', 'warn');
+            }
+          } else if (state.htmlVideo) {
+            state.htmlVideo.muted = !!settings.mutedStart;
+            state.isMuted = !!settings.mutedStart;
+            var playPromise = state.htmlVideo.play();
+            if (playPromise && typeof playPromise.catch === 'function') {
+              playPromise.catch(function () {
+                showNotice('Mobile browser blocked autoplay. Tap play inside the video player to begin playback.', 'warning');
+                addLog('Browser autoplay blocked; awaiting manual tap inside player.', 'warn');
+              });
+            }
+          }
+        }
+
+        function triggerPlayerPause() {
+          if (state.ytPlayer && typeof state.ytPlayer.pauseVideo === 'function') {
+            try {
+              state.ytPlayer.pauseVideo();
+            } catch (e) {}
+          }
+          if (state.htmlVideo) {
+            try {
+              state.htmlVideo.pause();
+            } catch (e) {}
+          }
+          state.isPlayingVerified = false;
+        }
+
+        function triggerPlayerStop() {
+          if (state.ytPlayer && typeof state.ytPlayer.stopVideo === 'function') {
+            try {
+              state.ytPlayer.stopVideo();
+            } catch (e) {}
+          }
+          if (state.htmlVideo) {
+            try {
+              state.htmlVideo.pause();
+              state.htmlVideo.currentTime = 0;
+            } catch (e) {}
+          }
+          state.isPlayingVerified = false;
+        }
+
+        function recordSessionToHistory(finalStatus) {
+          if (!state.parsedMedia || state.sessionElapsedMs < 1000) return;
+          var entry = {
+            id: 'sess_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+            url: state.parsedMedia.cleanUrl,
+            platform: state.parsedMedia.platform,
+            platformName: state.parsedMedia.platformName,
+            status: finalStatus,
+            sessionDurationMs: Math.round(state.sessionElapsedMs),
+            verifiedPlaybackMs: Math.round(state.verifiedPlaybackMs),
+            targetDurationSec: settings.targetDuration,
+            repeats: state.repeatCount,
+            startedAt: state.sessionStartTime ? state.sessionStartTime.toISOString() : new Date().toISOString(),
+            logs: state.currentLogs.slice(0, 40)
+          };
+          historyItems.unshift(entry);
+          saveHistorySync(historyItems);
+          idbPutSession(entry);
+          renderDashboardAndHistory();
+        }
+
+        function startTestEngine() {
+          if (!state.parsedMedia) {
+            var loaded = loadCurrentUrl();
+            if (!loaded) return;
+          }
+
+          if (state.sessionStatus === 'Completed' || state.sessionStatus === 'Stopped') {
+            state.sessionElapsedMs = 0;
+            state.verifiedPlaybackMs = 0;
+            state.repeatCount = 0;
+            state.sessionStartTime = null;
+          }
+
+          if (!state.sessionStartTime) {
+            state.sessionStartTime = new Date();
+          }
+
+          state.sessionStatus = 'Running';
+          state.lastTickAt = performance.now();
+          triggerPlayerPlay();
+
+          if (settings.autoScroll) {
+            startAutoScroll();
+          }
+
+          if (!tickInterval) {
+            tickInterval = setInterval(onEngineTick, 250);
+          }
+
+          addLog('Test session started (' + state.parsedMedia.platformName + ', target ' + settings.targetDuration + 's).', 'success');
+          updateControlButtons();
+          updateMetricsUI();
+        }
+
+        function pauseTestEngine() {
+          if (state.sessionStatus !== 'Running') return;
+          onEngineTick();
+          state.sessionStatus = 'Paused';
+          state.lastTickAt = null;
+          triggerPlayerPause();
+          stopAutoScroll();
+          addLog('Test session paused.');
+          updateControlButtons();
+          updateMetricsUI();
+        }
+
+        function stopTestEngine(isCompleted) {
+          if (state.sessionStatus === 'Idle') return;
+          onEngineTick();
+          if (tickInterval) {
+            clearInterval(tickInterval);
+            tickInterval = null;
+          }
+          stopAutoScroll();
+          triggerPlayerStop();
+
+          var finalStatus = isCompleted ? 'Completed' : 'Stopped';
+          state.sessionStatus = finalStatus;
+          state.playerStateLabel = finalStatus;
+          state.lastTickAt = null;
+
+          addLog(
+            'Test session ' +
+              finalStatus.toLowerCase() +
+              ' · Session ' +
+              formatDuration(state.sessionElapsedMs) +
+              ' · Verified playback ' +
+              formatDuration(state.verifiedPlaybackMs) +
+              '.',
+            isCompleted ? 'success' : undefined
+          );
+          recordSessionToHistory(finalStatus);
+          updateControlButtons();
+          updateMetricsUI();
+        }
+
+        function resetTestEngine() {
+          if (tickInterval) {
+            clearInterval(tickInterval);
+            tickInterval = null;
+          }
+          stopAutoScroll();
+          triggerPlayerStop();
+
+          state.sessionStatus = 'Idle';
+          state.playerStateLabel = state.parsedMedia ? 'Ready' : 'Idle';
+          state.sessionElapsedMs = 0;
+          state.verifiedPlaybackMs = 0;
+          state.repeatCount = 0;
+          state.sessionStartTime = null;
+          state.lastTickAt = null;
+
+          addLog('Testing session reset.');
+          updateControlButtons();
+          updateMetricsUI();
+        }
+
+        function updateLiveMediaPosition() {
+          if (state.ytPlayer && typeof state.ytPlayer.getCurrentTime === 'function' && typeof state.ytPlayer.getDuration === 'function') {
+            try {
+              var cur = state.ytPlayer.getCurrentTime();
+              var dur = state.ytPlayer.getDuration();
+              if (isFinite(cur) && isFinite(dur) && dur > 0) {
+                els.mediaPositionLabel.textContent = formatDuration(cur * 1000) + ' / ' + formatDuration(dur * 1000);
+                return;
+              }
+            } catch (e) {}
+          }
+          if (state.htmlVideo && isFinite(state.htmlVideo.currentTime)) {
+            var vCur = state.htmlVideo.currentTime || 0;
+            var vDur = state.htmlVideo.duration;
+            els.mediaPositionLabel.textContent =
+              formatDuration(vCur * 1000) + ' / ' + (isFinite(vDur) && vDur > 0 ? formatDuration(vDur * 1000) : '--:--');
+          }
+        }
+
+        function onEngineTick() {
+          if (state.sessionStatus !== 'Running' || !state.lastTickAt) return;
+          var now = performance.now();
+          var delta = now - state.lastTickAt;
+          state.lastTickAt = now;
+
+          state.sessionElapsedMs += delta;
+          if (state.isPlayingVerified) {
+            state.verifiedPlaybackMs += delta;
+          }
+
+          updateLiveMediaPosition();
+
+          var targetMs = settings.targetDuration * 1000;
+          if (settings.autoStop && state.sessionElapsedMs >= targetMs) {
+            state.sessionElapsedMs = targetMs;
+            stopTestEngine(true);
+            return;
+          }
+
+          updateMetricsUI();
+        }
+
+        els.btnStart.addEventListener('click', startTestEngine);
+        els.btnPause.addEventListener('click', pauseTestEngine);
+        els.btnStop.addEventListener('click', function () {
+          stopTestEngine(false);
+        });
+        els.btnReset.addEventListener('click', resetTestEngine);
+
+        function updateControlButtons() {
+          var running = state.sessionStatus === 'Running';
+          var paused = state.sessionStatus === 'Paused';
+          els.btnStart.disabled = running;
+          els.btnStart.innerHTML = paused
+            ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>Resume'
+            : '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>Start';
+          els.btnPause.disabled = !running;
+          els.btnStop.disabled = !running && !paused;
+        }
+
+        function updateMetricsUI() {
+          var targetMs = settings.targetDuration * 1000;
+          var remainingMs = Math.max(0, targetMs - state.sessionElapsedMs);
+          var pct = targetMs > 0 ? Math.min(100, (state.sessionElapsedMs / targetMs) * 100) : 0;
+
+          els.metricPlaybackTime.textContent = formatDuration(state.verifiedPlaybackMs);
+          els.metricSessionTime.textContent = formatDuration(state.sessionElapsedMs);
+          els.metricCountdown.textContent = formatDuration(remainingMs);
+          els.metricTargetLabel.textContent = 'Target ' + settings.targetDuration + 's';
+          els.metricSessionStart.textContent = state.sessionStartTime ? 'Started ' + formatClock(state.sessionStartTime) : 'Not started';
+          els.metricRepeatCount.textContent = state.repeatCount + (state.repeatCount === 1 ? ' repeat' : ' repeats');
+          els.sessionProgressFill.style.width = pct.toFixed(1) + '%';
+
+          if (state.parsedMedia && state.parsedMedia.platform === 'facebook') {
+            els.metricPlaybackNote.textContent = 'Cross-origin unverified';
+          } else {
+            els.metricPlaybackNote.textContent = state.isPlayingVerified ? 'Verified playing' : 'Verified playback';
+          }
+
+          var statusLabel = state.sessionStatus === 'Running' ? state.playerStateLabel : state.sessionStatus;
+          els.metricStatusText.textContent = statusLabel;
+
+          var dotColor = 'var(--text-muted)';
+          var pulsing = false;
+          if (state.sessionStatus === 'Running' && state.isPlayingVerified) {
+            dotColor = 'var(--success)';
+            pulsing = true;
+          } else if (state.sessionStatus === 'Running') {
+            dotColor = 'var(--accent)';
+            pulsing = true;
+          } else if (state.sessionStatus === 'Paused') {
+            dotColor = 'var(--warning)';
+          } else if (state.sessionStatus === 'Completed') {
+            dotColor = 'var(--success)';
+          } else if (state.playerStateLabel === 'Embed Restricted' || state.playerStateLabel === 'Media Error') {
+            dotColor = 'var(--danger)';
+          }
+
+          els.metricStatus.style.color = dotColor;
+          els.metricStatusDot.classList.toggle('is-pulsing', pulsing);
+
+          els.dashCurrentSession.textContent = formatDuration(state.sessionElapsedMs);
+          els.dashVerifiedSub.textContent = formatDuration(state.verifiedPlaybackMs) + ' verified playback';
+          els.dashStatus.textContent = statusLabel;
+          els.dashStartTime.textContent = state.sessionStartTime ? 'Started ' + formatClock(state.sessionStartTime) : 'Not started';
+        }
+
+        /* =========================================================
+           9. Auto-Scroll Engine & IntersectionObserver
+           ========================================================= */
+        function startAutoScroll() {
+          if (scrollRafId) return;
+          lastScrollFrameAt = performance.now();
+          state.scrollCarry = 0;
+
+          function step(now) {
+            if (!settings.autoScroll || state.sessionStatus !== 'Running') {
+              stopAutoScroll();
+              return;
+            }
+            var dt = (now - lastScrollFrameAt) / 1000;
+            lastScrollFrameAt = now;
+
+            var maxY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+            var curY = window.scrollY || window.pageYOffset || 0;
+
+            var dir = state.scrollDirectionSign;
+            if (settings.scrollMode === 'down') dir = 1;
+            if (settings.scrollMode === 'up') dir = -1;
+
+            if (settings.scrollMode === 'bounce') {
+              if (curY >= maxY - 2 && state.scrollDirectionSign > 0) {
+                state.scrollDirectionSign = -1;
+                dir = -1;
+              } else if (curY <= 2 && state.scrollDirectionSign < 0) {
+                state.scrollDirectionSign = 1;
+                dir = 1;
+              }
+            }
+
+            state.scrollCarry += settings.scrollSpeed * dt * dir;
+            if (Math.abs(state.scrollCarry) >= 1) {
+              var movePx = Math.trunc(state.scrollCarry);
+              state.scrollCarry -= movePx;
+              window.scrollBy(0, movePx);
+            }
+
+            scrollRafId = requestAnimationFrame(step);
+          }
+
+          scrollRafId = requestAnimationFrame(step);
+        }
+
+        function stopAutoScroll() {
+          if (scrollRafId) {
+            cancelAnimationFrame(scrollRafId);
+            scrollRafId = null;
+          }
+          lastScrollFrameAt = null;
+        }
+
+        window.addEventListener(
+          'scroll',
+          function () {
+            els.scrollYReadout.textContent = Math.round(window.scrollY || window.pageYOffset || 0) + ' px';
+          },
+          { passive: true }
+        );
+
+        els.btnScrollUp.addEventListener('click', function () {
+          window.scrollBy({ top: -280, behavior: 'smooth' });
+        });
+
+        els.btnScrollDown.addEventListener('click', function () {
+          window.scrollBy({ top: 280, behavior: 'smooth' });
+        });
+
+        els.btnScrollPlayer.addEventListener('click', function () {
+          els.playerStage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+
+        if ('IntersectionObserver' in window) {
+          var lastLoggedBucket = 100;
+          var observer = new IntersectionObserver(
+            function (entries) {
+              entries.forEach(function (entry) {
+                var pct = Math.round(entry.intersectionRatio * 100);
+                state.viewportVisiblePct = pct;
+                els.viewportVisibilityLabel.textContent = pct + '%';
+
+                var bucket = pct === 0 ? 0 : pct < 50 ? 25 : 100;
+                if (state.sessionStatus === 'Running' && bucket !== lastLoggedBucket) {
+                  lastLoggedBucket = bucket;
+                  addLog('Player viewport visibility changed to ' + pct + '%.');
+                }
+              });
+            },
+            { threshold: [0, 0.25, 0.5, 0.75, 1] }
+          );
+          observer.observe(els.playerStage);
+        }
+
+        /* =========================================================
+           10. Configuration, Settings & Log Copy
+           ========================================================= */
+        function syncConfigInputsFromSettings() {
+          els.inputTargetDuration.value = settings.targetDuration;
+          els.toggleAutoStop.checked = !!settings.autoStop;
+          els.toggleRepeat.checked = !!settings.repeatPlayback;
+          els.toggleMutedStart.checked = !!settings.mutedStart;
+          els.toggleAutoScroll.checked = !!settings.autoScroll;
+          els.selectScrollMode.value = settings.scrollMode || 'bounce';
+          els.rangeScrollSpeed.value = settings.scrollSpeed;
+          els.scrollSpeedReadout.textContent = settings.scrollSpeed + ' px/s';
+
+          els.presetBtns.forEach(function (btn) {
+            var d = parseInt(btn.getAttribute('data-duration'), 10);
+            btn.classList.toggle('is-active', d === settings.targetDuration);
+          });
+
+          els.settingThemeSelect.value = settings.theme;
+          els.settingDefaultDuration.value = settings.targetDuration;
+          els.settingDefaultScrollSpeed.value = settings.scrollSpeed;
+          els.settingDefaultScrollMode.value = settings.scrollMode || 'bounce';
+          els.settingDefaultAutoStop.checked = !!settings.autoStop;
+          els.settingDefaultRepeat.checked = !!settings.repeatPlayback;
+          els.settingDefaultMuted.checked = !!settings.mutedStart;
+
+          updateMetricsUI();
+        }
+
+        els.presetBtns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var sec = parseInt(btn.getAttribute('data-duration'), 10);
+            settings.targetDuration = sec;
+            saveSettings(settings);
+            syncConfigInputsFromSettings();
+            addLog('Test duration set to ' + sec + 's.');
+          });
+        });
+
+        els.inputTargetDuration.addEventListener('change', function () {
+          var val = parseInt(els.inputTargetDuration.value, 10);
+          if (isNaN(val) || val < 5) val = 5;
+          if (val > 7200) val = 7200;
+          settings.targetDuration = val;
+          saveSettings(settings);
+          syncConfigInputsFromSettings();
+        });
+
+        els.toggleAutoStop.addEventListener('change', function () {
+          settings.autoStop = els.toggleAutoStop.checked;
+          saveSettings(settings);
+          syncConfigInputsFromSettings();
+        });
+
+        els.toggleRepeat.addEventListener('change', function () {
+          settings.repeatPlayback = els.toggleRepeat.checked;
+          saveSettings(settings);
+          syncConfigInputsFromSettings();
+        });
+
+        els.toggleMutedStart.addEventListener('change', function () {
+          settings.mutedStart = els.toggleMutedStart.checked;
+          saveSettings(settings);
+          syncConfigInputsFromSettings();
+        });
+
+        els.toggleAutoScroll.addEventListener('change', function () {
+          settings.autoScroll = els.toggleAutoScroll.checked;
+          saveSettings(settings);
+          if (settings.autoScroll && state.sessionStatus === 'Running') {
+            startAutoScroll();
+            addLog('Auto-scroll enabled (' + settings.scrollMode + ', ' + settings.scrollSpeed + ' px/s).');
+          } else {
+            stopAutoScroll();
+          }
+        });
+
+        els.selectScrollMode.addEventListener('change', function () {
+          settings.scrollMode = els.selectScrollMode.value;
+          saveSettings(settings);
+          syncConfigInputsFromSettings();
+        });
+
+        els.rangeScrollSpeed.addEventListener('input', function () {
+          var spd = parseInt(els.rangeScrollSpeed.value, 10);
+          settings.scrollSpeed = spd;
+          els.scrollSpeedReadout.textContent = spd + ' px/s';
+          els.settingDefaultScrollSpeed.value = spd;
+          saveSettings(settings);
+        });
+
+        els.btnCopyLog.addEventListener('click', function () {
+          if (state.currentLogs.length === 0) return;
+          var text = state.currentLogs
+            .slice()
+            .reverse()
+            .map(function (entry) {
+              return '[' + entry.time + '] ' + entry.message;
+            })
+            .join('\n');
+          if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+            navigator.clipboard.writeText(text).then(function () {
+              els.btnCopyLog.textContent = 'Copied';
+              setTimeout(function () {
+                els.btnCopyLog.textContent = 'Copy';
+              }, 1600);
+            });
+          }
+        });
+
+        els.btnClearLog.addEventListener('click', function () {
+          state.currentLogs = [];
+          els.sessionLogList.innerHTML = '';
+          addLog('Session log cleared.');
+        });
+
+        // Settings Page Listeners
+        els.settingThemeSelect.addEventListener('change', function () {
+          applyTheme(els.settingThemeSelect.value);
+        });
+
+        els.settingDefaultDuration.addEventListener('change', function () {
+          var val = parseInt(els.settingDefaultDuration.value, 10);
+          if (isNaN(val) || val < 5) val = 5;
+          if (val > 7200) val = 7200;
+          settings.targetDuration = val;
+          saveSettings(settings);
+          syncConfigInputsFromSettings();
+          showSettingsFeedback('Default test duration updated to ' + val + 's.', 'info');
+        });
+
+        els.settingDefaultScrollSpeed.addEventListener('change', function () {
+          var val = parseInt(els.settingDefaultScrollSpeed.value, 10);
+          if (isNaN(val) || val < 10) val = 10;
+          if (val > 200) val = 200;
+          settings.scrollSpeed = val;
+          saveSettings(settings);
+          syncConfigInputsFromSettings();
+          showSettingsFeedback('Default scroll speed updated to ' + val + ' px/s.', 'info');
+        });
+
+        els.settingDefaultScrollMode.addEventListener('change', function () {
+          settings.scrollMode = els.settingDefaultScrollMode.value;
+          saveSettings(settings);
+          syncConfigInputsFromSettings();
+          showSettingsFeedback('Default scroll direction updated.', 'info');
+        });
+
+        els.settingDefaultAutoStop.addEventListener('change', function () {
+          settings.autoStop = els.settingDefaultAutoStop.checked;
+          saveSettings(settings);
+          syncConfigInputsFromSettings();
+        });
+
+        els.settingDefaultRepeat.addEventListener('change', function () {
+          settings.repeatPlayback = els.settingDefaultRepeat.checked;
+          saveSettings(settings);
+          syncConfigInputsFromSettings();
+        });
+
+        els.settingDefaultMuted.addEventListener('change', function () {
+          settings.mutedStart = els.settingDefaultMuted.checked;
+          saveSettings(settings);
+          syncConfigInputsFromSettings();
+        });
+
+        function showSettingsFeedback(msg, level) {
+          els.settingsFeedback.className = 'notice-banner is-visible is-' + (level || 'info');
+          els.settingsFeedbackText.textContent = msg;
+          setTimeout(function () {
+            els.settingsFeedback.classList.remove('is-visible');
+          }, 4000);
+        }
+
+        function updateDbStatusReadout() {
+          els.dbStatusDetail.textContent =
+            dbStatus + ' · ' + historyItems.length + (historyItems.length === 1 ? ' session stored' : ' sessions stored');
+        }
+
+        els.settingsVerifyDbBtn.addEventListener('click', function () {
+          var t0 = performance.now();
+          var testKey = '_vpat_probe_' + Date.now();
+          try {
+            localStorage.setItem(testKey, 'ok');
+            var lsOk = localStorage.getItem(testKey) === 'ok';
+            localStorage.removeItem(testKey);
+
+            if (!dbInstance) {
+              var msFallback = Math.round(performance.now() - t0);
+              showSettingsFeedback(
+                'LocalStorage read/write verified (' + msFallback + ' ms). IndexedDB unavailable in this context.',
+                lsOk ? 'success' : 'error'
+              );
+              return;
+            }
+
+            var tx = dbInstance.transaction(['settings'], 'readwrite');
+            var store = tx.objectStore('settings');
+            store.put({ key: testKey, value: Date.now() });
+            tx.oncomplete = function () {
+              var txRead = dbInstance.transaction(['settings'], 'readwrite');
+              var reqGet = txRead.objectStore('settings').get(testKey);
+              reqGet.onsuccess = function () {
+                var found = !!reqGet.result;
+                txRead.objectStore('settings').delete(testKey);
+                var ms = Math.round(performance.now() - t0);
+                updateDbStatusReadout();
+                showSettingsFeedback(
+                  'IndexedDB (VPAT_DB) & LocalStorage integrity verified in ' + ms + ' ms (' + historyItems.length + ' sessions).',
+                  found && lsOk ? 'success' : 'error'
+                );
+              };
+            };
+          } catch (err) {
+            showSettingsFeedback('Storage verification failed: ' + err.message, 'error');
+          }
+        });
+
+        /* =========================================================
+           11. Dashboard, History Filtering, Logs & CSV/JSON Export
+           ========================================================= */
+        function createHistoryRowEl(item, allowDeleteAndLog) {
+          var row = document.createElement('div');
+          row.className = 'history-row';
+
+          var top = document.createElement('div');
+          top.className = 'history-row-top';
+
+          var left = document.createElement('div');
+          left.style.minWidth = '0';
+          left.style.flex = '1';
+
+          var urlDiv = document.createElement('div');
+          urlDiv.className = 'history-url';
+          urlDiv.textContent = item.url;
+
+          var meta = document.createElement('div');
+          meta.className = 'history-meta';
+
+          var parts = [
+            item.platformName || 'Unknown',
+            item.status || 'Stopped',
+            'Session ' + formatDuration(item.sessionDurationMs || 0),
+            'Verified ' + formatDuration(item.verifiedPlaybackMs || 0),
+            (item.repeats || 0) + ' repeats',
+            formatDateTime(item.startedAt)
+          ];
+          parts.forEach(function (txt, idx) {
+            if (idx > 0) {
+              var sep = document.createElement('span');
+              sep.className = 'sep';
+              sep.setAttribute('aria-hidden', 'true');
+              sep.textContent = '·';
+              meta.appendChild(sep);
+            }
+            var span = document.createElement('span');
+            if (txt.indexOf('Session') === 0 || txt.indexOf('Verified') === 0) {
+              span.className = 'tabular';
+            }
+            span.textContent = txt;
+            meta.appendChild(span);
+          });
+
+          left.appendChild(urlDiv);
+          left.appendChild(meta);
+
+          var actions = document.createElement('div');
+          actions.className = 'history-actions';
+
+          var reloadBtn = document.createElement('button');
+          reloadBtn.type = 'button';
+          reloadBtn.className = 'btn btn-glass btn-sm';
+          reloadBtn.textContent = 'Load in Tester';
+          reloadBtn.addEventListener('click', function () {
+            setPlatform(item.platform || 'youtube');
+            els.urlInput.value = item.url;
+            switchView('tester');
+            loadCurrentUrl();
+          });
+          actions.appendChild(reloadBtn);
+
+          var logDrawer = null;
+          if (allowDeleteAndLog && Array.isArray(item.logs) && item.logs.length > 0) {
+            var logBtn = document.createElement('button');
+            logBtn.type = 'button';
+            logBtn.className = 'btn btn-glass btn-sm';
+            logBtn.textContent = 'Logs (' + item.logs.length + ')';
+
+            logDrawer = document.createElement('div');
+            logDrawer.className = 'history-log-drawer';
+            item.logs.forEach(function (lg) {
+              var line = document.createElement('div');
+              line.className = 'log-item';
+              var t = document.createElement('span');
+              t.className = 'log-time tabular';
+              t.textContent = lg.time;
+              var m = document.createElement('span');
+              m.className = 'log-msg' + (lg.level ? ' level-' + lg.level : '');
+              m.textContent = lg.message;
+              line.appendChild(t);
+              line.appendChild(m);
+              logDrawer.appendChild(line);
+            });
+
+            logBtn.addEventListener('click', function () {
+              logDrawer.classList.toggle('is-open');
+            });
+            actions.appendChild(logBtn);
+          }
+
+          if (allowDeleteAndLog) {
+            var delBtn = document.createElement('button');
+            delBtn.type = 'button';
+            delBtn.className = 'btn btn-danger-soft btn-sm';
+            delBtn.textContent = 'Delete';
+            delBtn.addEventListener('click', function () {
+              historyItems = historyItems.filter(function (x) {
+                return x.id !== item.id;
+              });
+              saveHistorySync(historyItems);
+              idbDeleteSession(item.id);
+              renderDashboardAndHistory();
+              updateDbStatusReadout();
+              addLog('Deleted session record (' + item.platformName + ').');
+            });
+            actions.appendChild(delBtn);
+          }
+
+          top.appendChild(left);
+          top.appendChild(actions);
+          row.appendChild(top);
+          if (logDrawer) {
+            row.appendChild(logDrawer);
+          }
+          return row;
+        }
+
+        function renderEmptyHistory(container, customMsg) {
+          container.innerHTML =
+            '<div class="empty-state">' +
+            '<div class="empty-state-title">' +
+            (customMsg ? 'No matching sessions' : 'No test sessions recorded yet') +
+            '</div>' +
+            '<p class="empty-state-desc">' +
+            (customMsg || 'Run and stop or complete a playback test in the Tester tab to record local session history.') +
+            '</p>' +
+            '</div>';
+        }
+
+        function getFilteredHistory() {
+          var q = (state.historySearch || '').trim().toLowerCase();
+          return historyItems.filter(function (item) {
+            if (state.historyFilter !== 'all' && item.platform !== state.historyFilter) {
+              return false;
+            }
+            if (q) {
+              var hay = ((item.url || '') + ' ' + (item.status || '') + ' ' + (item.platformName || '')).toLowerCase();
+              if (hay.indexOf(q) === -1) return false;
+            }
+            return true;
+          });
+        }
+
+        function renderDashboardAndHistory() {
+          var totalHistoryMs = historyItems.reduce(function (acc, item) {
+            return acc + (item.sessionDurationMs || 0);
+          }, 0);
+
+          els.dashTotalDuration.textContent = formatDuration(totalHistoryMs + state.sessionElapsedMs);
+          els.dashSessionsCount.textContent = historyItems.length + (historyItems.length === 1 ? ' saved session' : ' saved sessions');
+          els.dashPlatform.textContent =
+            state.platform === 'youtube' ? 'YouTube' : state.platform === 'facebook' ? 'Facebook' : 'Custom URL';
+          els.dashCompatNote.textContent = state.parsedMedia ? state.parsedMedia.telemetryPrecision : 'Awaiting URL';
+          els.dashCurrentUrl.textContent = state.url || 'No URL loaded yet';
+
+          els.dashRecentHistory.innerHTML = '';
+          if (historyItems.length === 0) {
+            renderEmptyHistory(els.dashRecentHistory);
+          } else {
+            historyItems.slice(0, 4).forEach(function (item) {
+              els.dashRecentHistory.appendChild(createHistoryRowEl(item, false));
+            });
+          }
+
+          var filtered = getFilteredHistory();
+          els.fullHistoryList.innerHTML = '';
+          if (historyItems.length === 0) {
+            renderEmptyHistory(els.fullHistoryList);
+          } else if (filtered.length === 0) {
+            renderEmptyHistory(els.fullHistoryList, 'Adjust your search query or platform filter to see saved sessions.');
+          } else {
+            filtered.forEach(function (item) {
+              els.fullHistoryList.appendChild(createHistoryRowEl(item, true));
+            });
+          }
+        }
+
+        els.historyFilterBtns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            state.historyFilter = btn.getAttribute('data-history-filter');
+            els.historyFilterBtns.forEach(function (b) {
+              b.classList.toggle('is-active', b === btn);
+            });
+            renderDashboardAndHistory();
+          });
+        });
+
+        els.historySearchInput.addEventListener('input', function () {
+          state.historySearch = els.historySearchInput.value;
+          renderDashboardAndHistory();
+        });
+
+        function triggerDownload(filename, content, mimeType) {
+          var blob = new Blob([content], { type: mimeType });
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement('a');
+          a.href = url;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(function () {
+            URL.revokeObjectURL(url);
+          }, 1000);
+        }
+
+        els.historyExportJson.addEventListener('click', function () {
+          if (historyItems.length === 0) return;
+          triggerDownload(
+            'playback-test-history-' + new Date().toISOString().slice(0, 10) + '.json',
+            JSON.stringify(historyItems, null, 2),
+            'application/json'
+          );
+          addLog('Exported ' + historyItems.length + ' session records to JSON.');
+        });
+
+        els.historyExportCsv.addEventListener('click', function () {
+          if (historyItems.length === 0) return;
+          var header = ['ID', 'Platform', 'URL', 'Status', 'SessionDurationSec', 'VerifiedPlaybackSec', 'TargetSec', 'Repeats', 'StartedAt'];
+          var rows = historyItems.map(function (item) {
+            return [
+              item.id,
+              item.platformName,
+              '"' + String(item.url || '').replace(/"/g, '""') + '"',
+              item.status,
+              Math.round((item.sessionDurationMs || 0) / 1000),
+              Math.round((item.verifiedPlaybackMs || 0) / 1000),
+              item.targetDurationSec || 0,
+              item.repeats || 0,
+              item.startedAt
+            ].join(',');
+          });
+          triggerDownload(
+            'playback-test-history-' + new Date().toISOString().slice(0, 10) + '.csv',
+            header.join(',') + '\n' + rows.join('\n'),
+            'text/csv;charset=utf-8'
+          );
+          addLog('Exported ' + historyItems.length + ' session records to CSV.');
+        });
+
+        function clearAllHistory() {
+          historyItems = [];
+          saveHistorySync([]);
+          idbClearSessions();
+          renderDashboardAndHistory();
+          updateDbStatusReadout();
+          els.historyClearConfirm.classList.remove('is-visible');
+          els.settingsClearConfirm.classList.remove('is-visible');
+          showSettingsFeedback('All session history cleared from IndexedDB and LocalStorage.', 'success');
+          addLog('Session history cleared.');
+        }
+
+        els.historyClearTrigger.addEventListener('click', function () {
+          if (historyItems.length === 0) return;
+          els.historyClearConfirm.classList.add('is-visible');
+        });
+        els.historyClearNo.addEventListener('click', function () {
+          els.historyClearConfirm.classList.remove('is-visible');
+        });
+        els.historyClearYes.addEventListener('click', clearAllHistory);
+
+        els.settingsClearHistoryBtn.addEventListener('click', function () {
+          els.settingsClearConfirm.classList.add('is-visible');
+        });
+        els.settingsClearNo.addEventListener('click', function () {
+          els.settingsClearConfirm.classList.remove('is-visible');
+        });
+        els.settingsClearYes.addEventListener('click', clearAllHistory);
+
+        els.settingsResetBtn.addEventListener('click', function () {
+          els.settingsResetConfirm.classList.add('is-visible');
+        });
+        els.settingsResetNo.addEventListener('click', function () {
+          els.settingsResetConfirm.classList.remove('is-visible');
+        });
+        els.settingsResetYes.addEventListener('click', function () {
+          settings = Object.assign({}, DEFAULT_SETTINGS);
+          saveSettings(settings);
+          applyTheme(settings.theme);
+          syncConfigInputsFromSettings();
+          els.settingsResetConfirm.classList.remove('is-visible');
+          showSettingsFeedback('Application settings restored to factory defaults.', 'success');
+          addLog('Application settings reset to defaults.');
+        });
+
+        /* =========================================================
+           12. Boot Sequence & Database Sync
+           ========================================================= */
+        applyTheme(settings.theme);
+        setPlatform('youtube');
+        syncConfigInputsFromSettings();
+        updateControlButtons();
+        updatePlayerControlsAvailability(false);
+        addLog('Test engine initialized. Ready for YouTube, Facebook, or custom URL.');
+        renderDashboardAndHistory();
+
+        openDatabase().then(function () {
+          idbGetAllSessions().then(function (idbSessions) {
+            if (Array.isArray(idbSessions)) {
+              if (idbSessions.length === 0 && historyItems.length > 0) {
+                historyItems.forEach(function (item) {
+                  idbPutSession(item);
+                });
+              } else if (idbSessions.length > 0) {
+                historyItems = idbSessions;
+                saveHistorySync(historyItems);
+              }
+            }
+            updateDbStatusReadout();
+            renderDashboardAndHistory();
+          });
+        });
+      })();
+    </script>
+  </body>
+</html>
